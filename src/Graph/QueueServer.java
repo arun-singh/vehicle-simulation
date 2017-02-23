@@ -8,10 +8,8 @@ public class QueueServer {
     private Node location;
     private Link incoming, outgoing;
     private Type type;
-
-    public Link getOutgoing() {
-        return outgoing;
-    }
+    private int serverDelay = 1; //TODO: Research intersection average delays
+    private double pocketDelayedUntil = -1;
 
     public enum Type{
         NORMAL,
@@ -23,5 +21,21 @@ public class QueueServer {
         this.outgoing = outgoing;
         this.location = incoming.getOutput();
         this.type = type;
+    }
+
+    public Link getOutgoing() {
+        return outgoing;
+    }
+
+    public int getDelay() {
+        return serverDelay;
+    }
+
+    public double getPocketDelayedUntil() {
+        return pocketDelayedUntil;
+    }
+
+    public void setPocketDelayedUntil(double pocketDelayedUntil) {
+        this.pocketDelayedUntil = pocketDelayedUntil;
     }
 }

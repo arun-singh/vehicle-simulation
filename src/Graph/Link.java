@@ -1,13 +1,14 @@
 package Graph;
 
 import GUI.*;
+import GUI.Map;
 import org.openstreetmap.gui.jmapviewer.*;
 
 import java.awt.*;
 import java.awt.geom.Path2D;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by Arun on 17/01/2017.
@@ -22,23 +23,31 @@ public class Link{
     private double vMin, vFree, kMin, kMax;
     private LinkPolyline polyline;
     private int lookBackLimit;
-    private List<QueueServer> servers;
+    private List<QueueServer> servers = new ArrayList<>();
     private int id;
+    private int delay = 0;
+    private List<Link> adjacencyList;
 
     public Link(int id, Node input, Node output){
         this.id = id;
         this.input = input;
         this.output = output;
         polyline = new LinkPolyline(this, generateInitialPath());
-        servers = new ArrayList<>();
     }
 
     public Link(int id){
         this.id = id;
-        servers = new ArrayList<>();
     }
 
-    public double speedDensity(double k){
+    public Link(int id, int queueCapacity, Node input, Node output){
+        this.id = id;
+        this.queue = new Queue(queueCapacity, this);
+        this.input = input;
+        this.output = output;
+    }
+
+    public double speedDensity(double time){
+        double k = runningDensity(time);
         if(k < kMin)
             return vFree;
         if(k > kMax)
@@ -82,12 +91,21 @@ public class Link{
         return coordinates;
     }
 
-    public double earliestExitTime(double speed){
-        return length / speed;
-    }
     public boolean isFree(){
         return getQueue().isFree();
     }
+
+    public static void getAdjacent(HashMap<Integer, Link> linkMap){
+        for (java.util.Map.Entry<Integer, Link> entry : linkMap.entrySet()) {
+            Node end = entry.getValue().getOutput();
+            List<Link> adjacent = linkMap.entrySet().stream()
+                    .filter(l -> l.getValue().getInput().equals(end))
+                    .map(java.util.Map.Entry::getValue)
+                    .collect(Collectors.toList());
+            entry.getValue().setAdjacencyList(adjacent);
+        }
+    }
+
 
     public Queue getQueue() {return queue;}
     public int getLanes() {
@@ -130,6 +148,13 @@ public class Link{
     public int getId() {
         return id;
     }
+    public int getDelay() {
+        return delay;
+    }
+
+    public void setDelay(int delay) {
+        this.delay = delay;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -143,5 +168,13 @@ public class Link{
     @Override
     public int hashCode() {
         return Objects.hash(output, input, id);
+    }
+
+    public List<Link> getAdjacencyList() {
+        return adjacencyList;
+    }
+
+    public void setAdjacencyList(List<Link> adjacencyList) {
+        this.adjacencyList = adjacencyList;
     }
 }

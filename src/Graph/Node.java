@@ -8,13 +8,12 @@ import java.util.Objects;
 public class Node{
 
     private double latitude;
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(latitude, longitude);
+    private double longitude;
+    private int id;
+    public Node(int id){
+        this.id = id;
     }
 
-    private double longitude;
     public Node(double latitude, double longitude){
         this.latitude = latitude;
         this.longitude = longitude;
@@ -34,6 +33,20 @@ public class Node{
         if (o == null || getClass() != o.getClass()) return false;
         Node node = (Node) o;
         return Double.compare(node.latitude, latitude) == 0 &&
-                Double.compare(node.longitude, longitude) == 0;
+                Double.compare(node.longitude, longitude) == 0 &&
+                    Integer.compare(node.id, id) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(latitude, longitude);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

@@ -17,9 +17,16 @@ public class Vehicle implements Comparable{
     private double earliestExitTime;
     private List<Link> route;
     private int linkCounter = 0;
+    private boolean impendingExit = false;
 
     public Vehicle(int ID){
         this.ID = ID;
+    }
+
+    public Vehicle(int ID, double earliestExitTime, double length){
+        this.ID = ID;
+        this.earliestExitTime = earliestExitTime;
+        this.length = length;
     }
 
     public void updateRoute(){
@@ -27,6 +34,14 @@ public class Vehicle implements Comparable{
             setNextLink(route.get(linkCounter++));
         }else
             System.out.println("Vehicle " + ID + " on last link: " + route.get(route.size()-1).getId());
+    }
+
+    public static Vehicle copy(Vehicle old){
+        Vehicle toReturn = new Vehicle(old.getID(), old.getEarliestExitTime(), old.getLength());
+        toReturn.setRoute(old.getRoute());
+        toReturn.setNextLink(old.getNextLink());
+        toReturn.setLinkCounter(old.getLinkCounter());
+        return toReturn;
     }
 
     public double getEarliestExitTime() {
@@ -53,6 +68,9 @@ public class Vehicle implements Comparable{
     public void setCurrentLink(Link currentLink) {
         this.currentLink = currentLink;
     }
+    public int getID(){return ID;};
+    public void setLinkCounter(int linkCounter){ this.linkCounter = linkCounter;}
+    public int getLinkCounter(){return linkCounter;}
 
     @Override
     public int compareTo(Object o) {
@@ -75,5 +93,13 @@ public class Vehicle implements Comparable{
     @Override
     public int hashCode() {
         return Objects.hash(ID);
+    }
+
+    public boolean isExitImpending() {
+        return impendingExit;
+    }
+
+    public void setImpendingExit(boolean impendingExit) {
+        this.impendingExit = impendingExit;
     }
 }

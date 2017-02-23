@@ -64,7 +64,7 @@ public class TestIntersectionHandling {
 
     @Test
     public void testSingleIntersection(){
-
+        Simulate sim = new Simulate();
         l1.getServers().add(new QueueServer(l1, l2, QueueServer.Type.NORMAL));
 
         List<Link> routeOne = new ArrayList<Link>(){{
@@ -79,7 +79,7 @@ public class TestIntersectionHandling {
                 link.setRunningDensity(link.runningDensity(i));
             }
             for(Link link: links) {
-                Simulate.handleIntersections(link, i);
+                sim.handleIntersections(link, i);
             }
         }
 
@@ -89,6 +89,7 @@ public class TestIntersectionHandling {
 
     @Test
     public void testMultipleIntersections(){
+        Simulate sim = new Simulate();
 
         l1.getServers().add(new QueueServer(l1, l2, QueueServer.Type.NORMAL));
         l1.getServers().add(new QueueServer(l1, l3, QueueServer.Type.NORMAL));
@@ -104,14 +105,14 @@ public class TestIntersectionHandling {
         }};
 
         for(int i = 1; i <= l1.getQueue().getCapacity(); i++)
-            Simulate.pushNewVehicle(l1, i, i <5 ? routeOne : routeTwo);
+            sim.pushNewVehicle(l1, i, i <5 ? routeOne : routeTwo);
 
         for(int i = 11; i < 60; i++){
+            //for(Link link: links) {
+                //link.setRunningDensity(link.runningDensity(i));
+            //}
             for(Link link: links) {
-                link.setRunningDensity(link.runningDensity(i));
-            }
-            for(Link link: links) {
-                Simulate.handleIntersections(link, i);
+                sim.handleIntersections(link, i);
             }
         }
 
