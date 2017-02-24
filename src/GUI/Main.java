@@ -51,7 +51,7 @@ public class Main extends Application{
             public void handle(WorkerStateEvent event) {
                 Grid grid = new Grid();
                 Simulate simulate = new Simulate(grid);
-                simulate.run();
+                //simulate.run();
             }
         });
         new Thread(sleeper).start();

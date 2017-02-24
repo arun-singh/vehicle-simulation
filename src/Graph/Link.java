@@ -27,6 +27,8 @@ public class Link{
     private int id;
     private int delay = 0;
     private List<Link> adjacencyList;
+    private InputQueue inputQueue = new InputQueue(this);
+    private OutputQueue outputQueue = new OutputQueue(this);
 
     public Link(int id, Node input, Node output){
         this.id = id;
@@ -95,16 +97,42 @@ public class Link{
         return getQueue().isFree();
     }
 
-    public static void getAdjacent(HashMap<Integer, Link> linkMap){
+    public static void createServers(HashMap<Integer, Link> linkMap){
         for (java.util.Map.Entry<Integer, Link> entry : linkMap.entrySet()) {
             Node end = entry.getValue().getOutput();
+            Node start = entry.getValue().getInput();
+
             List<Link> adjacent = linkMap.entrySet().stream()
-                    .filter(l -> l.getValue().getInput().equals(end))
+                    .filter(l -> l.getValue().getInput().equals(end) && !(l.getValue().getOutput().equals(start)))
                     .map(java.util.Map.Entry::getValue)
                     .collect(Collectors.toList());
             entry.getValue().setAdjacencyList(adjacent);
+
+            adjacent.stream().forEach(l -> entry.getValue().getServers().add(
+                    new QueueServer(entry.getValue(), l, QueueServer.Type.NORMAL)));
         }
     }
+
+    public static int totalVehiclesInput(HashMap<Integer, Link> linkMap){
+        return linkMap.entrySet().stream()
+                .mapToInt(l->l.getValue().getInputQueue().getVehiclesPushed())
+                .sum();
+    }
+
+    public static int totalVehiclesOutput(HashMap<Integer, Link> linkMap){
+        return linkMap.entrySet().stream()
+                .mapToInt(l->l.getValue().getOutputQueue().getReceived().size())
+                .sum();
+    }
+
+    public static List<Link> getInputLinks(HashMap<Integer, Link> linkMap){
+        return linkMap.entrySet().stream()
+                .filter(l->l.getValue().getServers().size()>0)
+                .map(java.util.Map.Entry::getValue)
+                .collect(Collectors.toList());
+    }
+
+
 
 
     public Queue getQueue() {return queue;}
@@ -151,6 +179,7 @@ public class Link{
     public int getDelay() {
         return delay;
     }
+    public double getvFree(){return vFree;}
 
     public void setDelay(int delay) {
         this.delay = delay;
@@ -176,5 +205,13 @@ public class Link{
 
     public void setAdjacencyList(List<Link> adjacencyList) {
         this.adjacencyList = adjacencyList;
+    }
+
+    public InputQueue getInputQueue() {
+        return inputQueue;
+    }
+
+    public OutputQueue getOutputQueue() {
+        return outputQueue;
     }
 }

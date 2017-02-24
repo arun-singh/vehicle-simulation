@@ -3,6 +3,7 @@ package Simulation;
 import Graph.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ public class Simulate {
     private final int SIMULATION_STEPS = 30;
     private final int ONE_STEP = 1;
     private static int vehicleCounter = 0;
+    public int shockwavesGenerated = 0;
     private Grid grid;
 
     public Simulate(Grid grid) {
@@ -21,30 +23,24 @@ public class Simulate {
     }
     public Simulate(){}
 
-    public void run() {
+    public void run(HashMap<Integer, Link> linkMap) {
         for (int step = 0; step < SIMULATION_STEPS; step+=ONE_STEP) {
             //TODO: Smarter method to instantiate vehicles needed
             //TODO: Need to assign routes
-            if (step < 10) {
-                List<Link> dummyRoute = new ArrayList<Link>(){{
-                    add(grid.getLinkMap().get(1));
-                }};
-                pushNewVehicle(grid.getLinkMap().get(0), step, dummyRoute);
-            }
+//            if (step < 10) {
+//                List<Link> dummyRoute = new ArrayList<Link>(){{
+//                    add(grid.getLinkMap().get(1));
+//                }};
+//                pushNewVehicle(grid.getLinkMap().get(0), step, dummyRoute);
+//            }
 
             // For all links calculate density
-            for (Map.Entry<Integer, Link> entry : grid.getLinkMap().entrySet()) {
+            for (Map.Entry<Integer, Link> entry : linkMap.entrySet()) {
                 entry.getValue().setRunningDensity(entry.getValue().runningDensity(step));
             }
 
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
             // For all links process turns - allowing more than one vehicle per step?
-            for (Map.Entry<Integer, Link> entry : grid.getLinkMap().entrySet()) {
+            for (Map.Entry<Integer, Link> entry : linkMap.entrySet()) {
                 handleIntersections(entry.getValue(), step);
             }
         }
@@ -72,9 +68,9 @@ public class Simulate {
 
     public boolean processPocketDelay(QueueServer server, Link link, double time){
         double pocketDelay = server.getPocketDelayedUntil();
-        server.setPocketDelayedUntil(pocketDelay - ONE_STEP);
         if(pocketDelay>0) {
-            if(pocketDelay - ONE_STEP == 0.0){ // Become unblocked so shock-wave formed
+            server.setPocketDelayedUntil(pocketDelay - ONE_STEP);
+            if(server.getPocketDelayedUntil() == 0.0){ // Become unblocked so shock-wave formed
                 int lookback = link.getLookBackLimit();
                 List<Vehicle> queued = QUtil.queuedVehicles(link.getQueue(), time);
                 List<Vehicle> forOutgoing = QUtil.getServerComforedVehicles(queued, server.getOutgoing(), lookback);
@@ -83,8 +79,10 @@ public class Simulate {
                 }
                 return true;
             }
+            return true;
+        }else{
+            return false;
         }
-        return false;
     }
 
     public boolean calculateDelay(QueueServer server, double time){
@@ -99,8 +97,13 @@ public class Simulate {
     }
 
 
-    public void processVehicle(Vehicle ve, Link current, QueueServer server){
-        server.getOutgoing().getQueue().push(ve);
+    public void processVehicle(Vehicle ve, Link current, QueueServer server, double time){
+        if(ve.isOnLastLink()){
+            int size = ve.getRoute().size();
+            ve.getRoute().get(size-1).getOutputQueue().received(ve, time);
+        }else {
+            server.getOutgoing().getQueue().push(ve);
+        }
         current.getQueue().remove(ve);
     }
 
@@ -113,7 +116,7 @@ public class Simulate {
             double _eet = time + (server.getOutgoing().getLength() / speed) + server.getDelay();
             ve.setEarliestExitTime(_eet);
             ve.updateRoute();
-            processVehicle(ve, current, server);
+            processVehicle(ve, current, server, time);
         }
     }
 
@@ -121,6 +124,7 @@ public class Simulate {
         //TODO: Use correct densities and flows
         //NOTE: Currently, vehicles in running section affected by shock-wave - distance in front could be made more
         //      accurate by working out distance travelled (not in mesoscopic scope)
+        shockwavesGenerated++;
         double shockSpeed = 2.0;
         double speedAtCap = 3.0;
         List<Vehicle> toUpdate = QUtil.getVehiclesBehind(current.getQueue(), start);

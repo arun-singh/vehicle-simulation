@@ -3,8 +3,11 @@ package Graph;
 import Graph.Link;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * Created by Arun on 17/01/2017.
@@ -15,10 +18,9 @@ public class Vehicle implements Comparable{
     private Link nextLink;
     private int ID;
     private double earliestExitTime;
-    private List<Link> route;
+    private List<Link> route = new ArrayList<>();
     private int linkCounter = 0;
-    private boolean impendingExit = false;
-
+    private boolean onLastLink = false;
     public Vehicle(int ID){
         this.ID = ID;
     }
@@ -30,10 +32,13 @@ public class Vehicle implements Comparable{
     }
 
     public void updateRoute(){
-        if(linkCounter != route.size()) {
-            setNextLink(route.get(linkCounter++));
-        }else
-            System.out.println("Vehicle " + ID + " on last link: " + route.get(route.size()-1).getId());
+        if(linkCounter != route.size()-1) {
+            linkCounter = linkCounter+1;
+            setNextLink(route.get(linkCounter));
+        }else {
+            setOnLastLink(true);
+            System.out.println("Vehicle " + ID + " on last link: " + route.get(route.size() - 1).getId());
+        }
     }
 
     public static Vehicle copy(Vehicle old){
@@ -42,6 +47,21 @@ public class Vehicle implements Comparable{
         toReturn.setNextLink(old.getNextLink());
         toReturn.setLinkCounter(old.getLinkCounter());
         return toReturn;
+    }
+
+    public static double estimatedSimTime(Vehicle[] vehicles){
+        double time = 0.0;
+        for(Vehicle veh: vehicles){
+            time+=veh.estimatedJourneyTime();
+        }
+        return time;
+    }
+
+    public double estimatedJourneyTime(){
+        double et=  route.stream()
+                .mapToDouble(l->l.getLength()/l.getvFree())
+                .sum();
+        return et;
     }
 
     public double getEarliestExitTime() {
@@ -95,11 +115,12 @@ public class Vehicle implements Comparable{
         return Objects.hash(ID);
     }
 
-    public boolean isExitImpending() {
-        return impendingExit;
+
+    public boolean isOnLastLink() {
+        return onLastLink;
     }
 
-    public void setImpendingExit(boolean impendingExit) {
-        this.impendingExit = impendingExit;
+    public void setOnLastLink(boolean onLastLink) {
+        this.onLastLink = onLastLink;
     }
 }
