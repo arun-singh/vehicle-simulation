@@ -91,7 +91,7 @@ public class TestShockwaves {
 
         List<Vehicle> outgoing = QUtil.queuedVehicles(linkOne.getQueue(), 40);
         for(int i = 0; i<QUEUE_SIZE; i++){
-            sim.processVehicle(outgoing.get(i), linkOne, linkOne.getServers().get(0));
+            sim.processVehicle(outgoing.get(i), linkOne, linkOne.getServers().get(0), i);
 
             assertThat(outgoing.get(i), not(isIn(linkOne.getQueue())));
             assertThat(outgoing.get(i), isIn(linkTwo.getQueue()));
@@ -124,7 +124,7 @@ public class TestShockwaves {
         int delay = 10;
         server.setPocketDelayedUntil(delay);
         boolean delayed = sim.processPocketDelay(server, linkOne, 0);
-        assertThat(delayed, is(false));
+        assertThat(delayed, is(true));
         assertThat(server.getPocketDelayedUntil(), is(delay-1.0));
 
         server.setPocketDelayedUntil(1.0);

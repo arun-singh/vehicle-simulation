@@ -55,6 +55,7 @@ public class Simulate {
             return;
 
         for (QueueServer server : link.getServers()) {
+
             boolean delayProcessed = processPocketDelay(server, link, time);
             if(delayProcessed) continue;
 
@@ -89,7 +90,7 @@ public class Simulate {
         boolean isFree = server.getOutgoing().isFree();
         if(!isFree){
             double shockSpeed = 2.0; //TODO: Use correct densities and flows
-            double delayedUntil = time + (server.getOutgoing().getLength() / shockSpeed);
+            double delayedUntil = server.getOutgoing().getLength() / shockSpeed;
             server.setPocketDelayedUntil(delayedUntil);
             return true;
         }
@@ -124,6 +125,8 @@ public class Simulate {
         //TODO: Use correct densities and flows
         //NOTE: Currently, vehicles in running section affected by shock-wave - distance in front could be made more
         //      accurate by working out distance travelled (not in mesoscopic scope)
+        if(current.getQueue().size()==0)
+            return;
         shockwavesGenerated++;
         double shockSpeed = 2.0;
         double speedAtCap = 3.0;

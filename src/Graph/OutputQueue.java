@@ -1,7 +1,6 @@
 package Graph;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,14 +8,15 @@ import java.util.List;
  */
 public class OutputQueue{
     private Link link;
-    private LinkedHashMap<Vehicle, Double> received = new LinkedHashMap<>();
+    private List<Vehicle> received = new ArrayList<>();
     public OutputQueue(Link link){
         this.link = link;
     }
     public void received(Vehicle vehicle, double time){
-        received.put(vehicle, time);
+        vehicle.setJourneyTime(time-vehicle.getStartTime());
+        received.add(vehicle);
     }
-    public HashMap<Vehicle, Double> getReceived(){
+    public List<Vehicle> getReceived(){
         return received;
     }
 }

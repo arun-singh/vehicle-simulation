@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Created by Arun on 17/01/2017.
  */
-public class InputQueue extends Queue {
+public class InputQueue{
     private Link link;
     private int vehiclesPushed = 0;
     private List<Vehicle> waiting = new ArrayList<>();
@@ -37,6 +37,7 @@ public class InputQueue extends Queue {
                 veh.setEarliestExitTime(_eet);
                 veh.setLinkCounter(1);
                 veh.setNextLink(veh.getRoute().get(1));
+                veh.setStartTime(time);
                 link.getQueue().push(veh);
                 waiting.remove(veh);
                 ++vehiclesPushed;

@@ -1,13 +1,8 @@
 package Graph;
 
-import Graph.Link;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 /**
  * Created by Arun on 17/01/2017.
@@ -21,6 +16,8 @@ public class Vehicle implements Comparable{
     private List<Link> route = new ArrayList<>();
     private int linkCounter = 0;
     private boolean onLastLink = false;
+    private double startTime, journeyTime;
+
     public Vehicle(int ID){
         this.ID = ID;
     }
@@ -37,7 +34,7 @@ public class Vehicle implements Comparable{
             setNextLink(route.get(linkCounter));
         }else {
             setOnLastLink(true);
-            System.out.println("Vehicle " + ID + " on last link: " + route.get(route.size() - 1).getId());
+           // System.out.println("Vehicle " + ID + " on last link: " + route.get(route.size() - 1).getId());
         }
     }
 
@@ -122,5 +119,21 @@ public class Vehicle implements Comparable{
 
     public void setOnLastLink(boolean onLastLink) {
         this.onLastLink = onLastLink;
+    }
+
+    public double getJourneyTime() {
+        return journeyTime;
+    }
+
+    public void setJourneyTime(double journeyTime) {
+        this.journeyTime = journeyTime;
+    }
+
+    public double getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(double startTime) {
+        this.startTime = startTime;
     }
 }

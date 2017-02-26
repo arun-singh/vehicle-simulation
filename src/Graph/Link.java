@@ -37,8 +37,10 @@ public class Link{
         polyline = new LinkPolyline(this, generateInitialPath());
     }
 
-    public Link(int id){
+    public Link(int id){this.id = id;}
+    public Link(int id, int queueCapacity){
         this.id = id;
+        this.queue = new Queue(queueCapacity, this);
     }
 
     public Link(int id, int queueCapacity, Node input, Node output){
@@ -111,25 +113,6 @@ public class Link{
             adjacent.stream().forEach(l -> entry.getValue().getServers().add(
                     new QueueServer(entry.getValue(), l, QueueServer.Type.NORMAL)));
         }
-    }
-
-    public static int totalVehiclesInput(HashMap<Integer, Link> linkMap){
-        return linkMap.entrySet().stream()
-                .mapToInt(l->l.getValue().getInputQueue().getVehiclesPushed())
-                .sum();
-    }
-
-    public static int totalVehiclesOutput(HashMap<Integer, Link> linkMap){
-        return linkMap.entrySet().stream()
-                .mapToInt(l->l.getValue().getOutputQueue().getReceived().size())
-                .sum();
-    }
-
-    public static List<Link> getInputLinks(HashMap<Integer, Link> linkMap){
-        return linkMap.entrySet().stream()
-                .filter(l->l.getValue().getServers().size()>0)
-                .map(java.util.Map.Entry::getValue)
-                .collect(Collectors.toList());
     }
 
 
