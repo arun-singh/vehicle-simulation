@@ -1,6 +1,8 @@
 package Graph;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -24,7 +26,7 @@ public class QUtil {
 
     public static List<Vehicle> getVehiclesBehind(Queue queue, Vehicle toCompare){
         return queue.stream()
-                .filter(v->v.getEarliestExitTime()>=toCompare.getEarliestExitTime() && !(v.equals(toCompare)))
+                .filter(v->v.getEarliestExitTime()>toCompare.getEarliestExitTime() && !(v.equals(toCompare)))
                 .sorted((v1, v2)->{return v1.compareTo(v2);})
                 .collect(Collectors.toList());
     }
@@ -49,4 +51,13 @@ public class QUtil {
                 .filter(v -> v.getNextLink().equals(outgoing))
                 .collect(Collectors.toList());
     }
+
+    public static List<InputQueue> getWaitingVehicles(HashMap<Integer, Link> linkMap){
+        return linkMap.entrySet().stream()
+                .filter(l->l.getValue().getInputQueue().getWaiting().size()>0)
+                .map(Map.Entry::getValue)
+                .map(l->l.getInputQueue())
+                .collect(Collectors.toList());
+    }
+
 }

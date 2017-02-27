@@ -1,5 +1,6 @@
 package Graph;
 
+import javax.xml.validation.ValidatorHandler;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,29 @@ import java.util.stream.Collectors;
  * Created by Arun on 24/02/2017.
  */
 public class Statistics {
+
+
+    private int finishStep, shockwavesGenerated;
+    private Vehicle[] vehicles;
+    private HashMap<Integer, Link> linkMap;
+
+    public Statistics(int finishStep, int shockwavesGenerated, Vehicle[] vehicles, HashMap<Integer, Link> linkMap){
+        this.finishStep = finishStep;
+        this.shockwavesGenerated = shockwavesGenerated;
+        this.vehicles = vehicles;
+        this.linkMap = linkMap;
+        report(finishStep, shockwavesGenerated,  vehicles, linkMap);
+    }
+
+    public static void report(int finishStep, int shockwavesGenerated, Vehicle[] vehicles, HashMap<Integer, Link> linkMap){
+        System.out.print("Finish time: " + finishStep + " ---- ");
+        System.out.print("Shockwaves generated: " + shockwavesGenerated + " ---- ");
+        System.out.print("Grid length: " + totalGridLength(linkMap) + " ---- ");
+        System.out.print("Estimated average journey: " + estimatedAverageJourneyTime(vehicles) + " ---- ");
+        System.out.println("Actual average journey: " + actualAverageJourneyTime(vehicles));
+    }
+
+
     public static int totalVehiclesInput(HashMap<Integer, Link> linkMap){
         return linkMap.entrySet().stream()
                 .mapToInt(l->l.getValue().getInputQueue().getVehiclesPushed())
