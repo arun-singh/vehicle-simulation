@@ -168,6 +168,13 @@ public class TestQueueOperations {
 
         List<Vehicle> behindLast = QUtil.getVehiclesBehind(queue, v3);
         assertThat(behindLast, IsEmptyCollection.empty());
+
+        v4.setEarliestExitTime(1);
+        v2.setEarliestExitTime(1);
+        v1.setEarliestExitTime(1);
+        v3.setEarliestExitTime(1);
+        List<Vehicle> allSame = QUtil.getVehiclesBehind(queue, v3);
+        assertThat(allSame, IsEmptyCollection.empty());
     }
 
     @Test

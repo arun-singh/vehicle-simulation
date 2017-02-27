@@ -41,10 +41,8 @@ public class TestShockwaves {
         linkTwo.setQueue(queueTwo);
 
         for(int i = 1; i <= QUEUE_SIZE; i++){
-            int length =  ran.nextInt(maxCarLength - minCarLength + 1) + minCarLength;
+            int length =  4;//ran.nextInt(maxCarLength - minCarLength + 1) + minCarLength;
             queueOne.push(new Vehicle(i, i*2, length));
-            int lengthTwo = ran.nextInt(maxCarLength - minCarLength + 1) + minCarLength;
-            queueTwo.push(new Vehicle(i, i, lengthTwo));
         }
 
         Queue beforeShockwave = QUtil.copy(queueOne);
@@ -53,7 +51,7 @@ public class TestShockwaves {
                 .mapToObj(i->i)
                 .collect(Collectors.toList());
 
-        sim.processShockwave(linkOne.getQueue().getHead(), linkOne, 10, linkTwo);
+        sim.processShockwave(QUtil.queuedVehicles(queueOne, 41), linkOne, 41, linkTwo);
 
         Queue afterShockwave = QUtil.copy(queueOne);
         List<Double> _eetAfterSchockwave = afterShockwave.stream()
@@ -62,11 +60,7 @@ public class TestShockwaves {
                 .collect(Collectors.toList());
 
         for(int j = 0; j < QUEUE_SIZE; j++){
-            if(j==0) {
-                assertThat(_eetBeforeShockwave.get(j), equalTo(_eetAfterSchockwave.get(j)));
-                continue;
-            }
-            assertThat(_eetAfterSchockwave.get(j), greaterThan(_eetBeforeShockwave.get(j)));
+            assertThat(_eetAfterSchockwave.get(j), greaterThan(_eetBeforeShockwave.get(j))); //assume all vehicles queued
         }
     }
 

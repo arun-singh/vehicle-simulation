@@ -16,7 +16,7 @@ public class Statistics {
     private Vehicle[] vehicles;
     private HashMap<Integer, Link> linkMap;
 
-    public Statistics(int finishStep, int shockwavesGenerated, Vehicle[] vehicles, HashMap<Integer, Link> linkMap){
+    public Statistics(int finishStep, int shockwavesGenerated,  Vehicle[] vehicles, HashMap<Integer, Link> linkMap){
         this.finishStep = finishStep;
         this.shockwavesGenerated = shockwavesGenerated;
         this.vehicles = vehicles;
@@ -24,12 +24,16 @@ public class Statistics {
         report(finishStep, shockwavesGenerated,  vehicles, linkMap);
     }
 
+    public Statistics(){
+
+    }
+
     public static void report(int finishStep, int shockwavesGenerated, Vehicle[] vehicles, HashMap<Integer, Link> linkMap){
         System.out.print("Finish time: " + finishStep + " ---- ");
         System.out.print("Shockwaves generated: " + shockwavesGenerated + " ---- ");
         System.out.print("Grid length: " + totalGridLength(linkMap) + " ---- ");
-        System.out.print("Estimated average journey: " + estimatedAverageJourneyTime(vehicles) + " ---- ");
-        System.out.println("Actual average journey: " + actualAverageJourneyTime(vehicles));
+        boolean longer = actualAverageJourneyTime(vehicles) - estimatedAverageJourneyTime(vehicles)  > 0 ? true : false;
+        System.out.println("Actual greater than estimate average journey: " +  longer);
     }
 
 
@@ -72,5 +76,37 @@ public class Statistics {
             sum += veh.getJourneyTime();
         }
         return sum/vehicles.length;
+    }
+
+    public int getFinishStep() {
+        return finishStep;
+    }
+
+    public void setFinishStep(int finishStep) {
+        this.finishStep = finishStep;
+    }
+
+    public int getShockwavesGenerated() {
+        return shockwavesGenerated;
+    }
+
+    public void setShockwavesGenerated(int shockwavesGenerated) {
+        this.shockwavesGenerated = shockwavesGenerated;
+    }
+
+    public Vehicle[] getVehicles() {
+        return vehicles;
+    }
+
+    public void setVehicles(Vehicle[] vehicles) {
+        this.vehicles = vehicles;
+    }
+
+    public HashMap<Integer, Link> getLinkMap() {
+        return linkMap;
+    }
+
+    public void setLinkMap(HashMap<Integer, Link> linkMap) {
+        this.linkMap = linkMap;
     }
 }

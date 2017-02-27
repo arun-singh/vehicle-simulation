@@ -4,14 +4,12 @@ import Graph.*;
 import Graph.Queue;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by Arun on 27/01/2017.
  */
 public class Simulate {
 
-    private final int SIMULATION_STEPS = 30;
     private final int ONE_STEP = 1;
     private static int vehicleCounter = 0;
     public int shockwavesGenerated = 0;
@@ -19,8 +17,8 @@ public class Simulate {
     Random ran = new Random();
     boolean randomise = true;
     int totalVehicles = 5000;
-    int roadLengthMax = 500;
-    int roadLengthMin = 50;
+    int roadLengthMax = 200;
+    int roadLengthMin = 100;
     int minLookBack = 1;
     int maxLookBack = 10;
     int minLanes = 1;
@@ -38,6 +36,7 @@ public class Simulate {
     public Statistics run(){
         Grid grid = new Grid();
         shockwavesGenerated = 0;
+
         generateLinks(grid.getNodes(), grid.getNodePairs(), grid.getLinkMap());
         Link.createServers(grid.getLinkMap());
         List<Link> inputLinks = Statistics.getInputLinks(grid.getLinkMap());
@@ -67,7 +66,7 @@ public class Simulate {
             vehiclesLeft = totalVehicles - Statistics.totalVehiclesOutput(grid.getLinkMap());
             step++;
         }
-        return new Statistics(step, shockwavesGenerated, vehicles, grid.getLinkMap());
+        return new Statistics(step, shockwavesGenerated,  vehicles, grid.getLinkMap());
     }
 
     private Vehicle[] generateVehicles(Vehicle[] vehicles, List<Link> inputLinks) {
@@ -100,7 +99,7 @@ public class Simulate {
         for(int i = 0; i<nodePairs.size(); i++) {
             for(int j = 0 ; j < 2 ; j++){
                 int length = randomise ? ran.nextInt(roadLengthMax - roadLengthMin + 1) + roadLengthMin : roadLengthMax;
-                int capacity = length/4;
+                int capacity = length/maxCarLength;
                 int id = (i*2)+j;
 
                 Integer[] pair = nodePairs.get(i);
@@ -147,13 +146,12 @@ public class Simulate {
         double pocketDelay = server.getPocketDelayedUntil();
         if(pocketDelay>0) {
             server.setPocketDelayedUntil(pocketDelay - ONE_STEP);
-            if(server.getPocketDelayedUntil() == 0.0){ // Become unblocked so shock-wave formed
+            if(server.getPocketDelayedUntil() <= 0.0){ // Become unblocked so shock-wave formed
                 int lookback = link.getLookBackLimit();
                 List<Vehicle> queued = QUtil.queuedVehicles(link.getQueue(), time);
                 List<Vehicle> forOutgoing = QUtil.getServerComforedVehicles(queued, server.getOutgoing(), lookback);
-                for(Vehicle ve : forOutgoing){
-                    processShockwave(ve, link, time, server.getOutgoing());
-                }
+                if(forOutgoing.size()>0)
+                    processShockwave(forOutgoing, link, time, server.getOutgoing());
                 return true;
             }
             return true;
@@ -166,7 +164,6 @@ public class Simulate {
 
         boolean isFree = server.getOutgoing().isFree();
         if(!isFree){
-
             double shockSpeed = 2.0; //TODO: Use correct densities and flows
             double delayedUntil = server.getOutgoing().getLength() / shockSpeed;
             server.setPocketDelayedUntil(delayedUntil);
@@ -199,20 +196,17 @@ public class Simulate {
         }
     }
 
-    public void processShockwave(Vehicle start, Link current, double time, Link outgoing){
+    public void processShockwave(List<Vehicle> vehicles, Link current, double time, Link outgoing){
         //TODO: Use correct densities and flows
-        //NOTE: Currently, vehicles in running section affected by shock-wave - distance in front could be made more
-        //      accurate by working out distance travelled (not in mesoscopic scope)
         if(current.getQueue().size()==0)
             return;
         double shockSpeed = 2.0;
         double speedAtCap = 3.0;
-        List<Vehicle> toUpdate = current.getQueue().size() == 1 ? new ArrayList<Vehicle>(){{add(start);}}
-                                                                : QUtil.getVehiclesBehind(current.getQueue(), start);
+
         shockwavesGenerated++;
-        double latestExitTime = toUpdate.get(0).getEarliestExitTime();
+        double latestExitTime = Double.MAX_VALUE;
         Queue beforeUpdates = QUtil.copy(current.getQueue());
-        for (Vehicle ve: toUpdate){
+        for (Vehicle ve: vehicles){
             if(ve.getEarliestExitTime() > latestExitTime) break;
             double distanceInFront = QUtil.distanceInFront(beforeUpdates, ve);
             double timeUntilShockwaveImpacts =  distanceInFront / shockSpeed;
@@ -248,7 +242,7 @@ public class Simulate {
     public static void main(String[] args){
         Simulate simulate = new Simulate();
         List<Statistics> stats = new ArrayList<>();
-        for(int i =0; i<100;i++) {
+        for(int i =0; i<20;i++) {
             stats.add(simulate.run());
         }
     }
