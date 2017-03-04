@@ -1,11 +1,11 @@
 import Graph.*;
 import Simulation.Simulate;
+import Statistics.Statistics;
 import org.junit.Test;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import static org.hamcrest.collection.IsIn.isIn;
-import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**

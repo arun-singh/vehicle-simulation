@@ -2,6 +2,7 @@ package Simulation;
 
 import Graph.*;
 import Graph.Queue;
+import Statistics.Statistics;
 
 import java.util.*;
 
@@ -15,16 +16,16 @@ public class Simulate {
     public int shockwavesGenerated = 0;
     private Grid grid;
     Random ran = new Random();
-    boolean randomise = true;
-    int totalVehicles = 5000;
-    int roadLengthMax = 200;
+    boolean randomise = false;
+    private Statistics stats;
+
+    public int totalVehicles = 10000;
+    int roadLengthMax = 1000;
     int roadLengthMin = 100;
     int minLookBack = 1;
     int maxLookBack = 10;
     int minLanes = 1;
     int maxLane = 2;
-    int minCap = 1;
-    int maxCap = 10;
     int minCarLength = 4;
     int maxCarLength = 6;
 
@@ -32,6 +33,10 @@ public class Simulate {
         this.grid = grid;
     }
     public Simulate(){}
+    public Simulate(int totalVehicles){
+        this.totalVehicles = totalVehicles;
+    }
+
 
     public Statistics run(){
         Grid grid = new Grid();
@@ -40,6 +45,7 @@ public class Simulate {
         generateLinks(grid.getNodes(), grid.getNodePairs(), grid.getLinkMap());
         Link.createServers(grid.getLinkMap());
         List<Link> inputLinks = Statistics.getInputLinks(grid.getLinkMap());
+        LinkedHashMap<Integer, Integer> vehiclesMap = new LinkedHashMap<>();
 
         Vehicle[] vehicles = new Vehicle[totalVehicles];
         generateVehicles(vehicles, inputLinks);
@@ -64,9 +70,11 @@ public class Simulate {
                 queue.pushWaiting(step);
 
             vehiclesLeft = totalVehicles - Statistics.totalVehiclesOutput(grid.getLinkMap());
+            vehiclesMap.put(step, vehiclesLeft);
             step++;
         }
-        return new Statistics(step, shockwavesGenerated,  vehicles, grid.getLinkMap());
+        stats = new Statistics(vehiclesMap, shockwavesGenerated,  vehicles, grid.getLinkMap(), totalVehicles);
+        return stats;
     }
 
     private Vehicle[] generateVehicles(Vehicle[] vehicles, List<Link> inputLinks) {
@@ -135,7 +143,7 @@ public class Simulate {
             if(delayProcessed) continue;
 
             boolean isOutgoingBlocked = calculateDelay(server, time);
-            if(isOutgoingBlocked) continue;
+            if(!isOutgoingBlocked) continue;
 
             // Outgoing link free
             processOutgoingVehicles(link, server, time);
@@ -161,17 +169,15 @@ public class Simulate {
     }
 
     public boolean calculateDelay(QueueServer server, double time){
-
         boolean isFree = server.getOutgoing().isFree();
         if(!isFree){
             double shockSpeed = 2.0; //TODO: Use correct densities and flows
             double delayedUntil = server.getOutgoing().getLength() / shockSpeed;
             server.setPocketDelayedUntil(delayedUntil);
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
-
 
     public void processVehicle(Vehicle ve, Link current, QueueServer server, double time){
         if(ve.isOnLastLink()){
@@ -186,7 +192,9 @@ public class Simulate {
     public void processOutgoingVehicles(Link current, QueueServer server, double time){
         int lookback = current.getLookBackLimit();
         List<Vehicle> queued = QUtil.queuedVehicles(current.getQueue(), time);
-        List<Vehicle> forOutgoing = QUtil.getServerComforedVehicles(queued, server.getOutgoing(), lookback);
+        int freeSpaces = server.getOutgoing().getQueue().getCapacity() - server.getOutgoing().getQueue().size();
+        int limit = freeSpaces < lookback ? freeSpaces : lookback;
+        List<Vehicle> forOutgoing = QUtil.getServerComforedVehicles(queued, server.getOutgoing(), limit);
         for (Vehicle ve : forOutgoing) {
             double speed = server.getOutgoing().speedDensity(time);
             double _eet = time + (server.getOutgoing().getLength() / speed) + server.getDelay();
@@ -201,7 +209,7 @@ public class Simulate {
         if(current.getQueue().size()==0)
             return;
         double shockSpeed = 2.0;
-        double speedAtCap = 3.0;
+        double speedAtCap = 1.0;
 
         shockwavesGenerated++;
         double latestExitTime = Double.MAX_VALUE;
@@ -242,8 +250,12 @@ public class Simulate {
     public static void main(String[] args){
         Simulate simulate = new Simulate();
         List<Statistics> stats = new ArrayList<>();
-        for(int i =0; i<20;i++) {
+        for(int i =0; i<50;i++) {
             stats.add(simulate.run());
         }
+    }
+
+    public Statistics getStats(){
+        return stats;
     }
 }

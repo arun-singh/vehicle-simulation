@@ -1,17 +1,13 @@
 import Graph.Link;
-import Graph.Statistics;
+import Statistics.Statistics;
 import Graph.Vehicle;
 import org.junit.Test;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsIn.isIn;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * Created by Arun on 24/02/2017.
