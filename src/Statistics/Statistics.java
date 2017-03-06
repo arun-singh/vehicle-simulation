@@ -148,6 +148,11 @@ public class Statistics {
                 .collect(Collectors.toList());
     }
 
+//    public static List<Link> getInputLinks2(HashMap<Integer, Link> linkMap){
+//
+//    }
+
+
     public static double totalGridLength(HashMap<Integer, Link> linkMap){
         return linkMap.entrySet().stream()
                 .mapToDouble(l->l.getValue().getLength())

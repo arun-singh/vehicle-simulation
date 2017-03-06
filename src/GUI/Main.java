@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 
 import java.awt.*;
+import java.util.*;
 
 /**
  * Created by Arun on 17/01/2017.
@@ -22,6 +23,8 @@ public class Main extends Application{
     static final int HEIGHT = 1000;
     static Stage primaryStage;
 
+    double maxLat, minLat, maxLon, minLon;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         Main.primaryStage = primaryStage;
@@ -29,7 +32,18 @@ public class Main extends Application{
         Main.primaryStage.setHeight(HEIGHT);
 
         Map map = Map.getInstance();
-        map.getMap().setDisplayPosition(new Coordinate(51.29766, -0.84528), 16);
+        //TODO: Get box coords
+        java.util.List<double[]> latlon = new ArrayList<>();
+        latlon.add(new double[]{52.4432354, -1.9366254});
+        latlon.add(new double[]{52.437009, -1.9293171});
+        latlon.add(new double[]{52.4469844, -1.9277054});
+        latlon.add(new double[]{52.4407134, -1.9255364});
+        maxLat = Grid.maxLat(latlon);
+        minLat = Grid.minLat(latlon);
+        minLon = Grid.minLon(latlon);
+        maxLon = Grid.maxLon(latlon);
+
+        map.getMap().setDisplayPosition(new Coordinate(52.4432354, -1.9366254), 16);
 
         Scene scene = new Scene(map);
         Main.primaryStage.setScene(scene);
@@ -49,8 +63,12 @@ public class Main extends Application{
         sleeper.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent event) {
-                Grid grid = new Grid();
-                Simulate simulate = new Simulate(grid);
+                Grid grid = new Grid(maxLat, minLat, maxLon, minLon);
+                System.out.println(grid.getPairs().size());
+                Map.getInstance().getMap().setGrid(grid);
+                Map.getInstance().drawMapMarkers(grid.getPairs());
+                //Map.getInstance().drawBounds();
+                //Simulate simulate = new Simulate(grid);
                 //simulate.run();
             }
         });

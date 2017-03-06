@@ -32,16 +32,13 @@ public class Query {
             e.printStackTrace();
         }
     }
-//select e.length as "length", n1.latitude as "Source lat", n1.longitude as "Source long", n.latitude as "Target latitude", n.longitude as "Target longitude"
-// from edges e, nodes n, nodes n1
-// where e.target = n.id AND
-// source = n1.id AND ((n.latitude <= 52.4469844 AND n.latitude >= 52.437009) AND (n.longitude >= -1.9366254 AND n.longitude <= -1.9255364));
+
     public static ResultSet getLinkFromBox(double maxLat, double minLat, double maxLon, double minLon){
         PreparedStatement stmt;
         ResultSet rs = null;
         String query = "SELECT e.length as \"length\", n1.latitude as \"Source lat\", n1.longitude as \"Source long\", n.latitude as \"Target lat\", n.longitude as \"Target long\" " +
                 "from edges e, nodes n, nodes n1 where e.target = n.id AND source = n1.id " +
-                "AND ((n.latitude <= ? AND n.latitude >= ?) AND (n.longitude >= ? AND n.longitude <= ?))";
+                "AND ((n.latitude <= ? AND n.latitude >= ?) AND (n.longitude >= ? AND n.longitude <= ?)) AND e.length >50";
         try {
             stmt = conn.prepareStatement(query);
             stmt.setDouble(1, maxLat);
@@ -86,7 +83,6 @@ public class Query {
     }
 
     public static void main(String[] args) {
-
         Query conn = new Query();
     }
 }

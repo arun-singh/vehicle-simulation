@@ -19,7 +19,7 @@ public class Simulate {
     boolean randomise = false;
     private Statistics stats;
 
-    public int totalVehicles = 10000;
+    public int totalVehicles = 100;
     int roadLengthMax = 1000;
     int roadLengthMin = 100;
     int minLookBack = 1;
@@ -31,19 +31,15 @@ public class Simulate {
 
     public Simulate(Grid grid) {
         this.grid = grid;
+        run();
     }
     public Simulate(){}
     public Simulate(int totalVehicles){
         this.totalVehicles = totalVehicles;
     }
 
-
     public Statistics run(){
-        Grid grid = new Grid();
         shockwavesGenerated = 0;
-
-        generateLinks(grid.getNodes(), grid.getNodePairs(), grid.getLinkMap());
-        Link.createServers(grid.getLinkMap());
         List<Link> inputLinks = Statistics.getInputLinks(grid.getLinkMap());
         LinkedHashMap<Integer, Integer> vehiclesMap = new LinkedHashMap<>();
 
@@ -70,6 +66,7 @@ public class Simulate {
                 queue.pushWaiting(step);
 
             vehiclesLeft = totalVehicles - Statistics.totalVehiclesOutput(grid.getLinkMap());
+            System.out.println(vehiclesLeft);
             vehiclesMap.put(step, vehiclesLeft);
             step++;
         }
