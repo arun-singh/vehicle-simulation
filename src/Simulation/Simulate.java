@@ -5,6 +5,7 @@ import Graph.Queue;
 import Statistics.Statistics;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Arun on 27/01/2017.
@@ -19,7 +20,7 @@ public class Simulate {
     boolean randomise = false;
     private Statistics stats;
 
-    public int totalVehicles = 100;
+    public int totalVehicles = 1000;
     int roadLengthMax = 1000;
     int roadLengthMin = 100;
     int minLookBack = 1;
@@ -85,12 +86,22 @@ public class Simulate {
             vehicle.getRoute().add(next);
             int serverSize = next.getServers().size();
 
+            int count = 0;
             while(serverSize!=0){
-                int serverIndex = ran.nextInt((serverSize-1) + 1);
+                int serverIndex = 0;//ran.nextInt((serverSize-1) + 1);
                 next = next.getServers().get(serverIndex).getOutgoing();
+                if(vehicle.getRoute().contains(next))
+                    break;
                 vehicle.getRoute().add(next);
                 serverSize = next.getServers().size();
+                count++;
             }
+            List<Link> list = vehicle.getRoute();
+            Set<Link> set = new HashSet<Link>(list);
+            if(set.size() < list.size()){
+                System.out.println("Dup links!!! in route!!");
+            }
+
             vehicles[i] = vehicle;
         }
 
@@ -105,6 +116,8 @@ public class Simulate {
             for(int j = 0 ; j < 2 ; j++){
                 int length = randomise ? ran.nextInt(roadLengthMax - roadLengthMin + 1) + roadLengthMin : roadLengthMax;
                 int capacity = length/maxCarLength;
+                if(capacity==0)
+                    capacity=1;
                 int id = (i*2)+j;
 
                 Integer[] pair = nodePairs.get(i);
@@ -135,7 +148,6 @@ public class Simulate {
             return;
 
         for (QueueServer server : link.getServers()) {
-
             boolean delayProcessed = processPocketDelay(server, link, time);
             if(delayProcessed) continue;
 
@@ -167,6 +179,7 @@ public class Simulate {
 
     public boolean calculateDelay(QueueServer server, double time){
         boolean isFree = server.getOutgoing().isFree();
+        int cap = server.getOutgoing().getQueue().getCapacity();
         if(!isFree){
             double shockSpeed = 2.0; //TODO: Use correct densities and flows
             double delayedUntil = server.getOutgoing().getLength() / shockSpeed;
@@ -202,7 +215,6 @@ public class Simulate {
     }
 
     public void processShockwave(List<Vehicle> vehicles, Link current, double time, Link outgoing){
-        //TODO: Use correct densities and flows
         if(current.getQueue().size()==0)
             return;
         double shockSpeed = 2.0;
