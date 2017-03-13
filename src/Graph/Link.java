@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * Created by Arun on 17/01/2017.
  */
 public class Link{
-    private Node output, input;
+    private Node target, source;
     private double length;
     private Queue queue;
     private int lanes;
@@ -29,11 +29,12 @@ public class Link{
     private List<Link> adjacencyList;
     private InputQueue inputQueue = new InputQueue(this);
     private OutputQueue outputQueue = new OutputQueue(this);
+    private boolean accessable;
 
-    public Link(int id, Node input, Node output){
+    public Link(int id, Node source, Node target){
         this.id = id;
-        this.input = input;
-        this.output = output;
+        this.source = source;
+        this.target = target;
         polyline = new LinkPolyline(this, generateInitialPath());
     }
 
@@ -43,11 +44,11 @@ public class Link{
         this.queue = new Queue(queueCapacity, this);
     }
 
-    public Link(int id, int queueCapacity, Node input, Node output){
+    public Link(int id, int queueCapacity, Node source, Node target){
         this.id = id;
         this.queue = new Queue(queueCapacity, this);
-        this.input = input;
-        this.output = output;
+        this.source = source;
+        this.target = target;
     }
 
     public double speedDensity(double time){
@@ -76,7 +77,7 @@ public class Link{
     }
 
     public List<Coordinate> generateInitialPath(){
-        List<Double[]> requested = RequestMapData.getCoordinates(getInput(), getOutput());
+        List<Double[]> requested = RequestMapData.getCoordinates(getSource(), getTarget());
         List<Point> points = new ArrayList<>();
         List<Coordinate> coordinates = new ArrayList<>();
         JMapViewer map = Map.getInstance().getMap();
@@ -101,11 +102,11 @@ public class Link{
 
     public static void createServers(HashMap<Integer, Link> linkMap){
         for (java.util.Map.Entry<Integer, Link> entry : linkMap.entrySet()) {
-            Node end = entry.getValue().getOutput();
-            Node start = entry.getValue().getInput();
+            Node end = entry.getValue().getTarget();
+            Node start = entry.getValue().getSource();
 
             List<Link> adjacent = linkMap.entrySet().stream()
-                    .filter(l -> l.getValue().getInput().equals(end) && !(l.getValue().getOutput().equals(start)))
+                    .filter(l -> l.getValue().getSource().equals(end) && !(l.getValue().getTarget().equals(start)))
                     .map(java.util.Map.Entry::getValue)
                     .collect(Collectors.toList());
             entry.getValue().setAdjacencyList(adjacent);
@@ -114,7 +115,6 @@ public class Link{
                     new QueueServer(entry.getValue(), l, QueueServer.Type.NORMAL)));
         }
     }
-
 
 
 
@@ -134,8 +134,8 @@ public class Link{
     public void setLength(double length) {
         this.length = length;
     }
-    public Node getOutput() {
-        return output;
+    public Node getTarget() {
+        return target;
     }
     public double getRunningLength() { return runningLength; }
     public void setRunningLength(double runningLength) { this.runningLength = runningLength; }
@@ -145,7 +145,7 @@ public class Link{
     public void setvFree(double vFree) {this.vFree = vFree; }
     public void setkMin(double kMin) {this.kMin = kMin;}
     public void setkMax(double kMax) {this.kMax = kMax;}
-    public Node getInput() { return input; }
+    public Node getSource() { return source; }
     public LinkPolyline getPolyline() { return polyline; }
     public int getLookBackLimit() {
         return lookBackLimit;
@@ -174,12 +174,12 @@ public class Link{
         if (o == null || getClass() != o.getClass()) return false;
         Link link = (Link) o;
         return id == link.id &&
-                Objects.equals(output, link.output) &&
-                Objects.equals(input, link.input);
+                Objects.equals(target, link.target) &&
+                Objects.equals(source, link.source);
     }
     @Override
     public int hashCode() {
-        return Objects.hash(output, input, id);
+        return Objects.hash(target, source, id);
     }
 
     public List<Link> getAdjacencyList() {
@@ -196,5 +196,13 @@ public class Link{
 
     public OutputQueue getOutputQueue() {
         return outputQueue;
+    }
+
+    public void setAccessable(boolean accessable) {
+        this.accessable = accessable;
+    }
+
+    public boolean isAccessable() {
+        return accessable;
     }
 }

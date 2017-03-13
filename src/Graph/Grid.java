@@ -1,6 +1,11 @@
 package Graph;
 
-import Database.Query;
+import Database.Query_V1;
+import Database.Query_V2;
+import Database.Query_V3;
+import GUI.Map;
+import org.openstreetmap.gui.jmapviewer.Coordinate;
+import org.openstreetmap.gui.jmapviewer.MapMarkerDot;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,34 +27,68 @@ public class Grid {
 
     public Grid(double maxLat, double minLat, double maxLon, double minLon){
         linkMap = new LinkedHashMap<>();
+        Map.getInstance().setGrid(this);
+//        ResultSet rs = Query_V3.getLinkFromBox(maxLat, minLat, maxLon, minLon, Query_V3.noFilter);
+//        List<Node[]> noFilter = generateNodePairs(rs);
+//
+//        rs = Query_V3.getLinkFromBox(maxLat, minLat, maxLon, minLon, Query_V3.waysFilter);
+//        List<Node[]> waysFilter = generateNodePairs(rs);
+//
+//        List<Node[]> unconnected = MapUtil.getUnconnected(carsFilter);
+//        System.out.println("Unconnected: " + unconnected.size());
+//
+//        rs = Query_V3.getRemoved(maxLat, minLat, maxLon, minLon);
+//        List<Node[]> removed = generateNodePairs(rs);
+//        MapUtil.filter(waysFilter, removed);
+//
+//        Map.getInstance().drawMapMarkers(unconnected);
 
-        ResultSet rs = Query.getLinkFromBox(maxLat, minLat, maxLon, minLon);
-        generateNodePairs(rs);
-        generateLinks(pairs, linkLengths);
+        ResultSet rs = Query_V3.getLinkFromBox(maxLat, minLat, maxLon, minLon, Query_V3.noFilter);
+        List<Node[]> carsFilter = generateNodePairs(rs);
+
+        //GH.request();
+
+        generateOneWayLinks(carsFilter, linkLengths);
         Link.createServers(linkMap);
+
+        List<Node[]> unconnected = new ArrayList<>();
+        for(java.util.Map.Entry<Integer, Link> entry : linkMap.entrySet()){
+            int connections = MapUtil.connections(entry.getValue());
+            if(connections==0)
+                unconnected.add(new Node[]{entry.getValue().getSource(), entry.getValue().getTarget()});
+            MapUtil.cache.clear();
+        }
+        System.out.println(unconnected.size());
+        Map.getInstance().drawMapMarkers(unconnected);
+       // Map.getInstance().getMap().addMapMarker(new MapMarkerDot(new Coordinate(52.4406603, -1.9253879)));
     }
 
-    private void generateNodePairs(ResultSet rs){
-        pairs = new ArrayList<>();
+    private List<Node[]> generateNodePairs(ResultSet rs){
+        List<Node[]> pairs = new ArrayList<>();
         linkLengths = new ArrayList<>();
         try {
             while(rs.next()){
                 Node one = new Node(rs.getDouble("Source lat"), rs.getDouble("Source long"));
                 Node two = new Node(rs.getDouble("Target lat"), rs.getDouble("Target long"));
+                int accessable = rs.getInt("Car");
                 double length = rs.getDouble("length");
                 pairs.add(new Node[]{one, two});
                 linkLengths.add(length);
             }
+            return pairs;
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return null;
     }
+
 
     private void generateLinks(List<Node[]> nodePairs, List<Double> lengths) {
         for(int i = 0; i<nodePairs.size(); i++) {
             for(int j = 0 ; j < 2 ; j++){
                 double length = lengths.get(i);
-                int capacity = (int)(Math.floor(length/maxCarLength));
+                int capacity = (int)(Math.ceil(length/maxCarLength));
+                if(capacity==0) capacity=1;
                 int id = (i*2)+j;
 
                 Node[] pair = nodePairs.get(i);
@@ -73,6 +112,36 @@ public class Grid {
 
                 linkMap.put(id, link);
             }
+        }
+    }
+
+    public void generateOneWayLinks(List<Node[]> nodePairs, List<Double> lengths) {
+        for (int i = 0; i < nodePairs.size(); i++) {
+            double length = lengths.get(i);
+            int capacity = (int) (Math.ceil(length / maxCarLength));
+            if (capacity == 0) capacity = 1;
+            int id = i;
+
+            Node[] pair = nodePairs.get(i);
+            Node start = pair[0];
+            Node end = pair[1];
+
+            Link link = new Link(id, capacity, start, end);
+            link.setLength(length);
+            int maxLookBack = 10;
+            int minLookBack = 1;
+
+            int lookBack = ran.nextInt(maxLookBack - minLookBack + 1) + minLookBack;
+            link.setLookBackLimit(lookBack);
+            int lanes = ran.nextInt(maxLane - minLanes + 1) + minLanes;
+            link.setLanes(lanes);
+
+            link.setkMin(0);
+            link.setkMax(5);
+            link.setvMin(1);
+            link.setvFree(5);
+
+            linkMap.put(id, link);
         }
     }
 
@@ -102,10 +171,6 @@ public class Grid {
                 .reduce((l1, l2)->Double.max(l1, l2))
                 .getAsDouble();
     }
-//
-//    public static boolean inBox(){
-//
-//    }
 
     private void generateArtificialNodes(Node[] nodes, int totalNodes){
         nodes = new Node[totalNodes];

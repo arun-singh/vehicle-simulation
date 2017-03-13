@@ -11,6 +11,10 @@ public class QueueServer {
     private int serverDelay = 1; //TODO: Research intersection average delays
     private double pocketDelayedUntil = -1;
 
+    public Node getLocation() {
+        return location;
+    }
+
     public enum Type{
         NORMAL,
         MERGE
@@ -19,7 +23,7 @@ public class QueueServer {
     public QueueServer(Link incoming, Link outgoing, Type type){
         this.incoming = incoming;
         this.outgoing = outgoing;
-        this.location = incoming.getOutput();
+        this.location = incoming.getTarget();
         this.type = type;
     }
 
