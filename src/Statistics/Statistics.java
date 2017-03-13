@@ -143,7 +143,7 @@ public class Statistics {
 
     public static List<Link> getInputLinks(HashMap<Integer, Link> linkMap){
         return linkMap.entrySet().stream()
-                .filter(l->l.getValue().getServers().size()>0)
+                .filter(l->l.getValue().getServers().size()>1)
                 .map(java.util.Map.Entry::getValue)
                 .collect(Collectors.toList());
     }
