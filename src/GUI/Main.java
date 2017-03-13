@@ -38,6 +38,10 @@ public class Main extends Application{
         latlon.add(new double[]{52.437009, -1.9293171});
         latlon.add(new double[]{52.4469844, -1.9277054});
         latlon.add(new double[]{52.4407134, -1.9255364});
+//        latlon.add(new double[]{52.55619865246977, -1.8279576301574707});
+//        latlon.add(new double[]{52.55600296354358, -1.81624174118042});
+//        latlon.add(new double[]{52.550705985085266, -1.8164992332458496});
+//        latlon.add(new double[]{52.55062769982075, -1.8253183364868164});
         maxLat = Grid.maxLat(latlon);
         minLat = Grid.minLat(latlon);
         minLon = Grid.minLon(latlon);
@@ -54,7 +58,7 @@ public class Main extends Application{
             @Override
             protected Void call() throws Exception {
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                 }
                 return null;
@@ -64,11 +68,11 @@ public class Main extends Application{
             @Override
             public void handle(WorkerStateEvent event) {
                 Grid grid = new Grid(maxLat, minLat, maxLon, minLon);
-                System.out.println(grid.getPairs().size());
-                Map.getInstance().getMap().setGrid(grid);
-                Map.getInstance().drawMapMarkers(grid.getPairs());
+                //Map.getInstance().getMap().setGrid(grid);
+                //Map.getInstance().drawMapMarkers(grid.getPairs());
                 //Map.getInstance().drawBounds();
-                //Simulate simulate = new Simulate(grid);
+                //Map.getInstance().drawQueueServers(grid.getLinkMap());
+               //Simulate simulate = new Simulate(grid);
                 //simulate.run();
             }
         });

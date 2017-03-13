@@ -1,7 +1,9 @@
 package GUI;
 
 import Graph.Grid;
+import Graph.Link;
 import Graph.Node;
+import Graph.QueueServer;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.layout.GridPane;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
@@ -9,12 +11,14 @@ import org.openstreetmap.gui.jmapviewer.DefaultMapController;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.MapMarkerDot;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
+import org.openstreetmap.gui.jmapviewer.interfaces.MapPolygon;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Arun on 27/01/2017.
@@ -58,7 +62,6 @@ public class Map extends GridPane {
     }
 
     public void drawMapMarkers(java.util.List<Node[]> coords){
-        System.out.println("Caleed");
         List<MapMarker> mapMarkerDots = new ArrayList<>();
         synchronized (map) {
             for (int i = 0; i < coords.size(); i++) {
@@ -76,6 +79,86 @@ public class Map extends GridPane {
             map.setMapMarkerList(mapMarkerDots);
         }
     }
+
+    public void drawMapMarkersFromLinks(HashMap<Integer, Link> linkMap){
+        List<MapMarker> mapMarkerDots = new ArrayList<>();
+        synchronized (map) {
+            for (java.util.Map.Entry<Integer, Link> entry : linkMap.entrySet()) {
+                Coordinate upstream = new Coordinate(entry.getValue().getSource().getLatitude(), entry.getValue().getSource().getLongitude());
+                Coordinate downstream = new Coordinate(entry.getValue().getTarget().getLatitude(), entry.getValue().getTarget().getLongitude());
+
+                MapMarkerDot up = new MapMarkerDot(upstream);
+                MapMarkerDot down = new MapMarkerDot(downstream);
+
+                mapMarkerDots.add(up);
+                mapMarkerDots.add(down);
+
+                //markerPairs.add(new MapMarker[]{up, down});
+            }
+            map.setMapMarkerList(mapMarkerDots);
+        }
+    }
+
+    public void drawEdges(List<Node[]> coords){
+        List<MapPolygon> lines = new ArrayList<>();
+        for(int i = 0; i < coords.size(); i++){
+            Coordinate upstream = new Coordinate(coords.get(i)[0].getLatitude(), coords.get(i)[0].getLongitude());
+            Coordinate downstream = new Coordinate(coords.get(i)[1].getLatitude(), coords.get(i)[1].getLongitude());
+            MapPolyLine poly = new MapPolyLine(new ArrayList<Coordinate>(){{
+                add(upstream);
+                add(downstream);
+            }});
+            poly.setColor(Color.red);
+            poly.setStroke(new BasicStroke(4));
+            poly.setVisible(true);
+            lines.add(poly);
+        }
+        map.setMapPolygonList(lines);
+        map.setMapPolygonsVisible(true);
+        //map.repaint();
+    }
+
+    public void drawQueueServers(HashMap<Integer, Link> linkMap){
+        System.out.println("Total nodes is " + (linkMap.entrySet().size() * 2));
+        HashSet<Node> serverNodes = new HashSet<>();
+        List<Link> links = linkMap.entrySet().stream()
+                                                .filter(l->l.getValue().getServers().size()==0)
+                                                .map(l->l.getValue())
+                                                .collect(Collectors.toList());
+
+        for(Link link : links){
+            //for(QueueServer server : link.getServers()){
+                serverNodes.add(link.getSource());
+            //}
+        }
+//
+        List<MapMarker> mapMarkerDots = new ArrayList<>();
+        for(Node node : serverNodes){
+            Coordinate coordinate = new Coordinate(node.getLatitude(), node.getLongitude());
+            mapMarkerDots.add(new MapMarkerDot(coordinate));
+        }
+        System.out.println("Total servers " + links.size());
+        map.setMapMarkerList(mapMarkerDots);
+    }
+
+    public void drawUnconnected(List<Node[]> pairs){
+        List<MapMarker> mapMarkerDots = new ArrayList<>();
+        for(int i = 0; i < pairs.size(); i++){
+            Coordinate upstream = new Coordinate(pairs.get(i)[0].getLatitude(), pairs.get(i)[0].getLongitude());
+            Coordinate downstream = new Coordinate(pairs.get(i)[1].getLatitude(), pairs.get(i)[1].getLongitude());
+
+            MapMarkerDot up = new MapMarkerDot(upstream);
+            up.setBackColor(Color.CYAN);
+            MapMarkerDot down = new MapMarkerDot(downstream);
+            down.setBackColor(Color.cyan);
+
+            mapMarkerDots.add(up);
+            mapMarkerDots.add(down);
+        }
+        map.setMapMarkerList(mapMarkerDots);
+    }
+
+
 
     public void drawBounds(){
         java.util.List<double[]> latlon = new ArrayList<>();
@@ -106,4 +189,5 @@ public class Map extends GridPane {
     public void setGrid(Grid grid) {
         this.grid = grid;
     }
+    public Grid getGrid(){return grid;}
 }
