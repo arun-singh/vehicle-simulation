@@ -33,8 +33,7 @@ public class Node{
         if (o == null || getClass() != o.getClass()) return false;
         Node node = (Node) o;
         return Double.compare(node.latitude, latitude) == 0 &&
-                Double.compare(node.longitude, longitude) == 0 &&
-                    Integer.compare(node.id, id) == 0;
+                Double.compare(node.longitude, longitude) == 0;
     }
 
     @Override
