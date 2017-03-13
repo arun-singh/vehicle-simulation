@@ -23,7 +23,8 @@ public class InputQueue{
         double _eet = time + (link.getLength() / speed);
         vehicle.setEarliestExitTime(_eet);
         vehicle.setLinkCounter(1);
-        vehicle.setNextLink(vehicle.getRoute().get(1));
+        if(vehicle.getRoute().size()>1)
+             vehicle.setNextLink(vehicle.getRoute().get(1));
         link.getQueue().push(vehicle);
         ++vehiclesPushed;
         return true;
