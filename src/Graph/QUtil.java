@@ -39,10 +39,20 @@ public class QUtil {
     }
 
     public static double distanceInFront(Queue queue, Vehicle toCompare){
-        return queue.stream()
+        double sum =  queue.stream()
                 .filter(v -> v.getEarliestExitTime() < toCompare.getEarliestExitTime())
                 .mapToDouble(v->v.getLength())
                 .sum();
+        if(sum == 0 && !(toCompare.equals(queue.getHead()))){
+            int pos = 0;
+            for(Vehicle v : queue){
+                if(v.equals(toCompare))
+                    break;
+                pos++;
+            }
+            sum += queue.stream().limit(pos).mapToDouble(v->v.getLength()).sum();
+        }
+        return sum;
     }
 
     public static List<Vehicle> getServerComforedVehicles(List<Vehicle> queued, Link outgoing, int lookback){
