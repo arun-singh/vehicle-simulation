@@ -24,7 +24,7 @@ public class Simulate {
     boolean randomise = false;
     private Statistics stats;
 
-    public int totalVehicles = 2000;
+    public int totalVehicles = 100;
     int roadLengthMax = 1000;
     int roadLengthMin = 100;
     int minLookBack = 1;
@@ -36,7 +36,6 @@ public class Simulate {
 
     public Simulate(Grid grid) {
         this.grid = grid;
-        run();
     }
 
     public Simulate() {
@@ -47,6 +46,7 @@ public class Simulate {
     }
 
     public Statistics run() {
+        System.out.println("Caled");
         shockwavesGenerated = 0;
         List<Link> inputLinks = MapUtil.getInputLinks(grid.getLinkMap(), grid.getAverageConnectivity());
         LinkedHashMap<Integer, Integer> vehiclesMap = new LinkedHashMap<>();
@@ -80,16 +80,16 @@ public class Simulate {
 
             System.out.println(vehiclesLeft);
             vehiclesMap.put(step, vehiclesLeft);
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Thread.sleep(100);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
             ///Statistics.diagnostics(grid.getLinkMap());
             step++;
         }
-        stats = new Statistics(vehiclesMap, shockwavesGenerated, vehicles, grid.getLinkMap(), totalVehicles);
-        return stats;
+        //stats = new Statistics(vehiclesMap, shockwavesGenerated, vehicles, grid.getLinkMap(), totalVehicles);
+        return null;
     }
 
     private Vehicle[] generateVehicles(Vehicle[] vehicles, List<Link> inputLinks) {
