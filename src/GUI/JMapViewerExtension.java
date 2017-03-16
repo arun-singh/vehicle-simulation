@@ -27,7 +27,7 @@ public class JMapViewerExtension extends JMapViewer{
         new DefaultMapController(this){
             @Override
             public void mouseClicked(MouseEvent e) {
-                Coordinate c = map.getPosition(e.getPoint());
+                Coordinate c = (Coordinate)map.getPosition(e.getPoint());
                 MapMarkerDot source = nearest(c);
                 Node nsource = new Node(source.getLat(), source.getLon());
                 System.out.println("-----------------------------------------------");
