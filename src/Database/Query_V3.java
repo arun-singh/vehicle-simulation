@@ -10,7 +10,7 @@ public class Query_V3 {
     public static String noFilter, waysFilter, carFilter, removed;
     private static Connection conn;
     public Query_V3(){
-        noFilter = "SELECT e.length as \"length\", e.car as \"car\", n1.lat as \"Source lat\", n1.lon as \"Source long\", n.lat as \"Target lat\", n.lon as \"Target long\" " +
+        noFilter = "SELECT e.length as \"length\", e.car_rev as \"oneway\", n1.lat as \"Source lat\", n1.lon as \"Source long\", n.lat as \"Target lat\", n.lon as \"Target long\", e.the_geom as \"line\"" +
                 "from edges e, nodes n, nodes n1 " +
                 "where e.target = n.original_id AND source = n1.original_id " +
                 "AND (((n.lat BETWEEN ? AND ?) AND (n.lon BETWEEN ? AND ?)) OR ((n1.lat BETWEEN ? AND ?) AND (n1.lon BETWEEN ? AND ?)))";
