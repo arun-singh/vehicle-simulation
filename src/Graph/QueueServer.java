@@ -10,6 +10,7 @@ public class QueueServer {
     private Type type;
     private int serverDelay = 1; //TODO: Research intersection average delays
     private double pocketDelayedUntil = -1;
+    private int entriesDeniedCount = 0;
 
     public Node getLocation() {
         return location;
@@ -30,16 +31,19 @@ public class QueueServer {
     public Link getOutgoing() {
         return outgoing;
     }
-
     public int getDelay() {
         return serverDelay;
     }
-
     public double getPocketDelayedUntil() {
         return pocketDelayedUntil;
     }
-
     public void setPocketDelayedUntil(double pocketDelayedUntil) {
         this.pocketDelayedUntil = pocketDelayedUntil;
+    }
+    public void setEntriesDeniedCount(int entriesDeniedCount) {
+        this.entriesDeniedCount = entriesDeniedCount;
+    }
+    public int getEntriesDeniedCount() {
+        return entriesDeniedCount;
     }
 }
