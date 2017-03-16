@@ -73,7 +73,7 @@ public class Grid {
         System.out.println(totalCap);
 
        // Map.getInstance().drawMapMarkers(carsFilter);
-        Map.getInstance().drawGrid(linkMap);
+      //Map.getInstance().drawGrid(linkMap);
 
         List<Node[]> targs = MapUtil.getTargetLinks(carsFilter, new Node(52.415984, -1.8059506));
        // 52.4153049, -1.8083075
@@ -136,6 +136,7 @@ public class Grid {
 
     private void generateLinks(List<Node[]> nodePairs, List<Double> lengths, List<Boolean> oneway, List<List<Coordinate>> linestring) {
         int seen = 0;
+        List<MapPolygon> polys = new ArrayList<>();
         for(int i = 0; i<nodePairs.size(); i++) {
             boolean ow = oneway.get(i);
             int rev = ow ? 1 : 2;
@@ -171,6 +172,9 @@ public class Grid {
                     link.setPolyline(coords);
                 }
 
+                polys.add(link.getPolyline());
+                //Map.getInstance().getMap().addMapPolygon(link.getPolyline());
+
                 link.setkMin(0);
                 link.setkMax(((double)capacity)/length);
                 link.setvMin(1);
@@ -178,6 +182,7 @@ public class Grid {
                 linkMap.put(id, link);
             }
         }
+        Map.getInstance().getMap().setMapPolygonList(polys);
     }
 
     public void generateOneWayLinks(List<Node[]> nodePairs, List<Double> lengths) {
