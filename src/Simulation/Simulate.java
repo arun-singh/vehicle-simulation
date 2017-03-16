@@ -20,7 +20,7 @@ public class Simulate {
     boolean randomise = false;
     private Statistics stats;
 
-    public int totalVehicles = 1000;
+    public int totalVehicles = 2000;
     int roadLengthMax = 1000;
     int roadLengthMin = 100;
     int minLookBack = 1;
@@ -41,16 +41,16 @@ public class Simulate {
 
     public Statistics run(){
         shockwavesGenerated = 0;
-        List<Link> inputLinks = Statistics.getInputLinks(grid.getLinkMap());
+        List<Link> inputLinks = MapUtil.getInputLinks(grid.getLinkMap(), grid.getAverageConnectivity());
         LinkedHashMap<Integer, Integer> vehiclesMap = new LinkedHashMap<>();
 
         Vehicle[] vehicles = new Vehicle[totalVehicles];
+        int pushed = 0;
         generateVehicles(vehicles, inputLinks);
 
         int step = 0;
-        int vehiclesLeft = Integer.MAX_VALUE;
+        int vehiclesLeft = -1;
         while (vehiclesLeft!=0) {
-
             // For all links calculate density
             for (Map.Entry<Integer, Link> entry : grid.getLinkMap().entrySet()) {
                 entry.getValue().setRunningDensity(entry.getValue().runningDensity(step));
@@ -67,10 +67,16 @@ public class Simulate {
                 queue.pushWaiting(step);
 
             vehiclesLeft = totalVehicles - Statistics.totalVehiclesOutput(grid.getLinkMap());
+//            double totalDensity = grid.getLinkMap().entrySet().stream().mapToDouble(l->l.getValue().getRunningDensity()).sum();
+//            double avgDensity = totalDensity / grid.getLinkMap().size();
+//            int vehiclesonqueue = grid.getLinkMap().entrySet().stream().mapToInt(l->l.getValue().getQueue().size()).sum();
+
             System.out.println(vehiclesLeft);
             vehiclesMap.put(step, vehiclesLeft);
+            //Statistics.diagnostics(grid.getLinkMap());
             step++;
         }
+
         stats = new Statistics(vehiclesMap, shockwavesGenerated,  vehicles, grid.getLinkMap(), totalVehicles);
         return stats;
     }
@@ -81,29 +87,18 @@ public class Simulate {
             Vehicle vehicle = new Vehicle(i);
             vehicle.setLength(length);
 
-            int randomStartingLink = ran.nextInt((inputLinks.size()-1) + 1);
-            Link next = inputLinks.get(randomStartingLink);
-            vehicle.getRoute().add(next);
-            int serverSize = next.getServers().size();
+            List<Link> route = Grid.generateRoute(inputLinks);
+            vehicle.setRoute(route);
 
-            int count = 0;
-            while(serverSize!=0){
-                int serverIndex = 0;//ran.nextInt((serverSize-1) + 1);
-                next = next.getServers().get(serverIndex).getOutgoing();
-                if(vehicle.getRoute().contains(next))
-                    break;
-                vehicle.getRoute().add(next);
-                serverSize = next.getServers().size();
-                count++;
-            }
             List<Link> list = vehicle.getRoute();
-            Set<Link> set = new HashSet<Link>(list);
+            Set<Link> set = new HashSet<>(list);
             if(set.size() < list.size()){
                 System.out.println("Dup links!!! in route!!");
             }
-
             vehicles[i] = vehicle;
         }
+
+        //GUI.Map.getInstance().drawRoutes(vehicles);
 
         for(int i = 0; i<totalVehicles;i++){
             vehicles[i].getRoute().get(0).getInputQueue().push(vehicles[i], 0.0);
@@ -127,7 +122,7 @@ public class Simulate {
                 Link link = new Link(id, capacity, start, end);
                 link.setLength(length);
                 int lookBack = randomise ? ran.nextInt(maxLookBack - minLookBack + 1) + minLookBack : maxLookBack;
-                link.setLookBackLimit(lookBack);
+                link.setLookBackLimit(lookBack > capacity ? capacity : lookBack);
                 int lanes =  randomise ? ran.nextInt(maxLane - minLanes + 1) + minLanes : maxLane;
                 link.setLanes(lanes);
 
@@ -181,6 +176,7 @@ public class Simulate {
         boolean isFree = server.getOutgoing().isFree();
         int cap = server.getOutgoing().getQueue().getCapacity();
         if(!isFree){
+            server.setEntriesDeniedCount(server.getEntriesDeniedCount()+1);
             double shockSpeed = 2.0; //TODO: Use correct densities and flows
             double delayedUntil = server.getOutgoing().getLength() / shockSpeed;
             server.setPocketDelayedUntil(delayedUntil);
@@ -238,6 +234,7 @@ public class Simulate {
             return false;
 
         double speed = link.speedDensity(time);
+        System.out.println(speed);
         double _eet = time + (link.getLength() / speed);
 
         Vehicle vehicle = new Vehicle(++vehicleCounter);

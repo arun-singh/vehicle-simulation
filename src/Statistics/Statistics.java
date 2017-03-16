@@ -10,10 +10,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -143,15 +140,10 @@ public class Statistics {
 
     public static List<Link> getInputLinks(HashMap<Integer, Link> linkMap){
         return linkMap.entrySet().stream()
-                .filter(l->l.getValue().getServers().size()>1)
+                .filter(l->l.getValue().getServers().size()>1 && l.getValue().getConnectivity()>250)
                 .map(java.util.Map.Entry::getValue)
                 .collect(Collectors.toList());
     }
-
-//    public static List<Link> getInputLinks2(HashMap<Integer, Link> linkMap){
-//
-//    }
-
 
     public static double totalGridLength(HashMap<Integer, Link> linkMap){
         return linkMap.entrySet().stream()
@@ -173,6 +165,47 @@ public class Statistics {
             sum += veh.getJourneyTime();
         }
         return sum/vehicles.length;
+    }
+
+    public static void diagnostics(HashMap<Integer, Link> linkMap){
+        List<Link> occupied = linkMap.entrySet().stream()
+                                                .filter(l->l.getValue().getQueue().size()>0)
+                                                .map(Map.Entry::getValue)
+                                                .collect(Collectors.toList());
+
+        occupied.sort(new Comparator<Link>() {
+            @Override
+            public int compare(Link o1, Link o2) {
+                int o1Size = o1.getQueue().size();
+                int o2size = o2.getQueue().size();
+                if(o1Size==o2size)
+                    return 0;
+                if(o1Size>o2size)
+                    return 1;
+                return -1;
+            }
+        });
+
+        for(Link link : occupied){
+            int id = link.getId();
+            int vehicleCount = link.getQueue().size();
+            int[] nextLinkIds = link.getQueue().stream().mapToInt(v->v.getNextLink().getId()).toArray();
+            int cap = link.getQueue().getCapacity();
+            int lookback = link.getLookBackLimit();
+            double latS = link.getSource().getLatitude();
+            double lonS = link.getSource().getLongitude();
+            double latT = link.getTarget().getLatitude();
+            double lonT = link.getTarget().getLongitude();
+            String coord = latS + ", " + lonS + ":" + latT + ", " + lonT;
+
+            System.out.print(String.format("%-20s-- %s%d" , "Link id: " + id, "Vehicle count: ", vehicleCount));
+            System.out.print("  Lookback: " + lookback + " -- Cap: " + cap + "-- Next links: ");
+            for(Integer i: nextLinkIds){
+                System.out.print(String.format("  %-5s -- " , i));
+            }
+            System.out.println(coord);
+        }
+        System.out.println("-----------------------------------------------------");
     }
 
     public int getFinishStep() {
@@ -208,6 +241,8 @@ public class Statistics {
     }
 
     public static void main(String[] args){
-        Statistics.increaseCars(100, 10100, 1000, 10);
+        //Statistics.increaseCars(100, 10100, 1000, 10);
+        //double a = Math.log(1.1);
+       // System.out.println(a);
     }
 }
