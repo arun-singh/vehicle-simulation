@@ -39,6 +39,7 @@ public class Queue extends PriorityQueue<Vehicle> implements QueueTemplate {
 
     @Override
     public void push(Vehicle vehicle) {
+        vehicle.getSeen().add(link);
         add(vehicle);
     }
 
@@ -70,7 +71,7 @@ public class Queue extends PriorityQueue<Vehicle> implements QueueTemplate {
 
     public void runningProportion(double time, int runningCars){
         double size = size();
-        double newProportion = runningCars/size;
+        double newProportion = ((double)runningCars)/size;
         if(newProportion != runningProportion)
             setRunningProportion(newProportion);
     }

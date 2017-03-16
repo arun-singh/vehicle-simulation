@@ -30,6 +30,7 @@ public class Link{
     private InputQueue inputQueue = new InputQueue(this);
     private OutputQueue outputQueue = new OutputQueue(this);
     private boolean accessable;
+    private int connectivity;
 
     public Link(int id, Node source, Node target){
         this.id = id;
@@ -52,14 +53,15 @@ public class Link{
     }
 
     public double speedDensity(double time){
-        double k = runningDensity(time);
+        double k = 0.001;//runningDensity(time);
+        //System.out.println(k);
         if(k < kMin)
             return vFree;
         if(k > kMax)
             return vMin;
 
-        double u = 1 - Math.pow(((k - kMin)/(kMax-kMin)), 1);
-        double v = Math.pow(u, 1);
+        double u = 1 - Math.pow(((k - kMin)/(kMax-kMin)), 2);
+        double v = Math.pow(u, 2);
         double x = vFree - vMin;
         double y = x * v;
         double z = vMin + y;
@@ -72,7 +74,7 @@ public class Link{
         queue.runningProportion(time, carCount);
 
         double runningLength = getLength() - (queue.queueLength(time)/getLanes());
-        double density = runningLength != 0.0 ? carCount / (runningLength * getLanes()) : 0.0;
+        double density = runningLength != 0.0 ? ((double)(carCount)) / (runningLength * getLanes()) : 0.0;
         return density;
     }
 
@@ -147,6 +149,7 @@ public class Link{
     public void setkMax(double kMax) {this.kMax = kMax;}
     public Node getSource() { return source; }
     public LinkPolyline getPolyline() { return polyline; }
+    public void setPolyline(List<Coordinate> coords){polyline = new LinkPolyline(this, coords);}
     public int getLookBackLimit() {
         return lookBackLimit;
     }
@@ -204,5 +207,13 @@ public class Link{
 
     public boolean isAccessable() {
         return accessable;
+    }
+
+    public int getConnectivity() {
+        return connectivity;
+    }
+
+    public void setConnectivity(int connectivity) {
+        this.connectivity = connectivity;
     }
 }
