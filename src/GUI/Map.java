@@ -1,6 +1,8 @@
 package GUI;
 
 import Graph.*;
+import javafx.concurrent.ScheduledService;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.layout.GridPane;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
@@ -13,9 +15,12 @@ import org.openstreetmap.gui.jmapviewer.interfaces.MapPolygon;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
+import java.util.Timer;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +33,7 @@ public class Map extends GridPane {
     private List<MapMarker[]> markerPairs = new ArrayList<>();
     private final int ZOOM_LEVEL = 50;
     private static Map ourInstance = new Map();
+    int flag = 0;
 
     public Map() {
         super();
@@ -54,9 +60,14 @@ public class Map extends GridPane {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+
                 swingNode.setContent(map);
             }
         });
+    }
+
+    public void update(){
+        map.repaint();
     }
 
     public void drawMapMarkers(java.util.List<Node[]> coords){
@@ -179,13 +190,10 @@ public class Map extends GridPane {
 
     public void drawGrid(HashMap<Integer, Link> linkMap){
         List<MapPolygon> poly = new ArrayList<>();
+        List<Link> links = linkMap.entrySet().stream().map(l->l.getValue()).collect(Collectors.toList());
         for(java.util.Map.Entry<Integer, Link> entry : linkMap.entrySet()){
-            Link link = entry.getValue();
-            //poly.add(new MapPolyLine(link.getPolyline().getCoordinates()));
-            poly.add(new MapPolyLine(new ArrayList<Coordinate>(){{
-                add(new Coordinate(link.getSource().getLatitude(), link.getSource().getLongitude()));
-                add(new Coordinate(link.getTarget().getLatitude(), link.getTarget().getLongitude()));
-            }}));
+            List<Coordinate> coords = entry.getValue().getPolyline().getCoordinates();
+            poly.add(new MapPolyLine(coords));
         }
         map.setMapPolygonList(poly);
     }
