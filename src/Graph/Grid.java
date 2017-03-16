@@ -156,6 +156,7 @@ public class Grid {
                 double lookBack = capacity==1 ? 1 : Math.ceil(((double)capacity)/4);
                 link.setLookBackLimit(lookBack == 0 ? 1 : (int)lookBack);
 
+                //b
                 int lanes = 1;//ran.nextInt(maxLane - minLanes + 1) + minLanes;
                 link.setLanes(lanes);
 
