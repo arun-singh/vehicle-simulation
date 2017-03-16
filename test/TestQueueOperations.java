@@ -6,7 +6,7 @@ import static org.hamcrest.CoreMatchers.*;
 import org.hamcrest.collection.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-
+import static org.hamcrest.Matchers.greaterThan;
 import org.junit.Assert;
 import java.util.List;
 
@@ -95,6 +95,126 @@ public class TestQueueOperations {
         Assert.assertTrue(popped.equals(v2));
         Assert.assertTrue(queueOne.getHead().equals(v1));
     }
+
+    @Test
+    public void testCarRunningCount(){
+        Queue queue = new Queue();
+        Link link = new Link(1);
+        link.setQueue(queue);
+
+        Vehicle v1 = new Vehicle(3);
+        v1.setLength(4);
+        Vehicle v2 = new Vehicle(2);
+        v2.setLength(4);
+        Vehicle v3 = new Vehicle(3);
+        v3.setLength(4);
+        Vehicle v4 = new Vehicle(4);
+        v4.setLength(4);
+
+        v1.setEarliestExitTime(3);
+        v2.setEarliestExitTime(2);
+        v3.setEarliestExitTime(4);
+        v4.setEarliestExitTime(1);
+        queue.push(v1);
+        queue.push(v2);
+        queue.push(v3);
+        queue.push(v4);
+
+        double time = 4;
+        int carCount = queue.runningSectionCars(time);
+        assertThat(carCount, is(1));
+
+        time = 1;
+        carCount = queue.runningSectionCars(time);
+        assertThat(carCount, is(4));
+
+        time = 5;
+        carCount = queue.runningSectionCars(time);
+        assertThat(carCount, is(0));
+    }
+
+    @Test
+    public void testRunningDensity(){
+        Queue queue = new Queue();
+        Link link = new Link(1);
+        link.setQueue(queue);
+        link.setLength(40);
+        link.setLanes(1);
+
+        Vehicle v1 = new Vehicle(3);
+        v1.setLength(4);
+        Vehicle v2 = new Vehicle(2);
+        v2.setLength(4);
+        Vehicle v3 = new Vehicle(3);
+        v3.setLength(4);
+        Vehicle v4 = new Vehicle(4);
+        v4.setLength(4);
+
+        v1.setEarliestExitTime(3);
+        v2.setEarliestExitTime(2);
+        v3.setEarliestExitTime(4);
+        v4.setEarliestExitTime(1);
+
+        double time = 0;
+        double densityZeroCar = link.runningDensity(time);
+        assertThat(densityZeroCar, is(0.0));
+
+        queue.push(v1);
+        double densityOneCar = link.runningDensity(time);
+
+        queue.push(v2);
+        double densityTwoCar = link.runningDensity(time);
+        assertThat(densityTwoCar, greaterThan(densityOneCar));
+
+        queue.push(v3);
+        double densityThreeCar = link.runningDensity(time);
+        assertThat(densityThreeCar, greaterThan(densityTwoCar));
+
+        queue.push(v4);
+        double densityFourCar = link.runningDensity(time);
+        assertThat(densityFourCar, greaterThan(densityThreeCar));
+    }
+
+    @Test
+    public void testSpeedDensity(){
+        Queue queue = new Queue();
+        Link link = new Link(1);
+        link.setQueue(queue);
+        link.setLength(40);
+        link.setLanes(1);
+
+        Vehicle v1 = new Vehicle(3);
+        v1.setLength(4);
+        Vehicle v2 = new Vehicle(2);
+        v2.setLength(4);
+        Vehicle v3 = new Vehicle(3);
+        v3.setLength(4);
+        Vehicle v4 = new Vehicle(4);
+        v4.setLength(4);
+
+        v1.setEarliestExitTime(3);
+        v2.setEarliestExitTime(2);
+        v3.setEarliestExitTime(4);
+        v4.setEarliestExitTime(1);
+
+        link.setkMin(0);
+        link.setkMax(5);
+        link.setvMin(1);
+        link.setvFree(5);
+
+        double time = 0;
+        double speed = link.speedDensity(time);
+        System.out.println(speed);
+
+        queue.push(v1);
+        speed = link.speedDensity(time);
+        System.out.println(speed);
+
+        queue.push(v2);
+        speed = link.speedDensity(time);
+        System.out.println(speed);
+    }
+
 
     @Test
     public void testQueuedVehicles(){
