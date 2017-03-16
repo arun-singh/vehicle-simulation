@@ -85,7 +85,7 @@ public class Simulate {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            //Statistics.diagnostics(grid.getLinkMap());
+            ///Statistics.diagnostics(grid.getLinkMap());
             step++;
         }
         stats = new Statistics(vehiclesMap, shockwavesGenerated, vehicles, grid.getLinkMap(), totalVehicles);
