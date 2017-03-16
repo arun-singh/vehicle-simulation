@@ -34,7 +34,7 @@ public class LinkPolyline extends MapPolygonImpl{
         setColor(Color.BLACK);
         setStroke(new BasicStroke(20));
         setVisible(true);
-       // generateInitialPath();
+        setCoordinates(points);
     }
 
     @Override
