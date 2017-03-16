@@ -5,6 +5,7 @@ import GUI.Map;
 import GUI.MapPolyLine;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.MapMarkerDot;
+import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapPolygon;
 import org.postgresql.geometric.PGline;
 import org.postgresql.geometric.PGpolygon;
@@ -71,19 +72,8 @@ public class Grid {
 
         System.out.println(totalCap);
 
-       // List<List<Link>> routes = GH.generateRoutes(linkMap, 1);
-//        List<Link> route = routes.get(0);
-//        List<Coordinate> coords = new ArrayList<>();
-//        for (Link l :
-//                route) {
-//            coords.add(new Coordinate(l.getSource().getLatitude(), l.getSource().getLongitude()));
-//            coords.add(new Coordinate(l.getTarget().getLatitude(), l.getTarget().getLongitude()));
-//        }
-//        MapPolyLine line = new MapPolyLine(coords);
-//        Map.getInstance().getMap().addMapPolygon(line);
-
-        Map.getInstance().drawMapMarkers(carsFilter);
-        //Map.getInstance().drawGrid(linkMap);
+       // Map.getInstance().drawMapMarkers(carsFilter);
+        Map.getInstance().drawGrid(linkMap);
 
         List<Node[]> targs = MapUtil.getTargetLinks(carsFilter, new Node(52.415984, -1.8059506));
        // 52.4153049, -1.8083075
@@ -93,13 +83,19 @@ public class Grid {
                 .collect(Collectors.toList());
         List<Coordinate> coord = find.get(0).getPolyline().getCoordinates();
         List<Coordinate> newCoord = new ArrayList<>();
+        MapMarker m1 = new MapMarkerDot(new Coordinate(52.415981,-1.8059502));
+        MapMarker m2 = new MapMarkerDot(new Coordinate(52.416769, -1.8066207));
+        //Map.getInstance().getMap().addMapMarker(m1);
+        //Map.getInstance().getMap().addMapMarker(m2);
+
         //for(Coordinate c : coord){
             newCoord.add(new Coordinate(52.415981,-1.8059502));
             newCoord.add(new Coordinate(52.416769, -1.8066207));
         //}
-        MapPolygon line = new MapPolyLine(newCoord);
+        Collections.reverse(newCoord);
+        //MapPolygon line = new MapPolyLine(newCoord);
 
-        Map.getInstance().getMap().addMapPolygon(line);
+       // Map.getInstance().getMap().addMapPolygon(line);
         System.out.println(Map.getInstance().getMap().getMapPolygonList().size());
     }
 
@@ -166,7 +162,7 @@ public class Grid {
                 List<Coordinate> coords = linestring.get(i);
                 if(j==1){
                     List<Coordinate> reversed = new ArrayList<>();
-                    for(int k = coords.size()-1; k>0; k--){
+                    for(int k = coords.size()-1; k>=0; k--){
                         reversed.add(new Coordinate(coords.get(k).getLat(), coords.get(k).getLon()));
                     }
                     link.setPolyline(reversed);

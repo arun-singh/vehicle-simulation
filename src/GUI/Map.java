@@ -7,6 +7,7 @@ import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.DefaultMapController;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.MapMarkerDot;
+import org.openstreetmap.gui.jmapviewer.interfaces.ICoordinate;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapPolygon;
 
@@ -180,7 +181,11 @@ public class Map extends GridPane {
         List<MapPolygon> poly = new ArrayList<>();
         for(java.util.Map.Entry<Integer, Link> entry : linkMap.entrySet()){
             Link link = entry.getValue();
-            poly.add(new MapPolyLine(link.getPolyline().getCoordinates()));
+            //poly.add(new MapPolyLine(link.getPolyline().getCoordinates()));
+            poly.add(new MapPolyLine(new ArrayList<Coordinate>(){{
+                add(new Coordinate(link.getSource().getLatitude(), link.getSource().getLongitude()));
+                add(new Coordinate(link.getTarget().getLatitude(), link.getTarget().getLongitude()));
+            }}));
         }
         map.setMapPolygonList(poly);
     }

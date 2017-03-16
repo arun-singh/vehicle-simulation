@@ -39,54 +39,22 @@ public class LinkPolyline extends MapPolygonImpl{
 
     @Override
     public void paint(Graphics g, List<Point> wayPoints) {
-//        if (!SwingUtilities.isEventDispatchThread()) {
-//            throw new RuntimeException("Repaint attempt is not on event dispatch thread");
-//        }
         Graphics2D g2d = (Graphics2D) g.create();
-        g2d.setStroke(new BasicStroke(8));
-
-//        float alpha = 0.8f;
-//        AlphaComposite alcom = AlphaComposite.getInstance(
-//        AlphaComposite.SRC_OVER, alpha);
-//        g2d.setComposite(alcom);
-//        g2d.setColor(Color.GREEN);
-//        g2d.draw(runningPath);
-//        g2d.setColor(Color.red);
-//        g2d.draw(queuePath);
-
-        double prop = link.getQueue().getRunningProportion();
-        Point.Double sep = calculateRoadBoundary(wayPoints, prop);
-
-        Path2D path1 = updateRunning(wayPoints, sep);
-        g2d.setColor(Color.GREEN);
-        g2d.draw(path1);
-
-        Path2D path2 = updateQueue(wayPoints, sep);
-        g2d.setColor(Color.RED);
-        g2d.draw(path2);
-
+        g2d.setColor(link.getQueue().size() > 0 ? Color.red : Color.green);
+        g2d.setStroke(new BasicStroke(4));
+        Path2D path = buildPath(wayPoints);
+        g2d.draw(path);
         g2d.dispose();
+
     }
 
-    private Path2D buildPath1(List<Point> wayPoints) {
+    private Path2D buildPath(List<Point> wayPoints) {
         Path2D path = new Path2D.Double();
         if (wayPoints != null && wayPoints.size() > 0) {
             Point firstPoint = wayPoints.get(0);
             path.moveTo(firstPoint.getX(), firstPoint.getY());
-            for (int i = 0; i <= 2; i++) {
-                path.lineTo(wayPoints.get(i).getX(), wayPoints.get(i).getY());
-            }
-        }
-        return path;
-    }
-
-    private Path2D buildPath2(List<Point> wayPoints) {
-        Path2D path = new Path2D.Double();
-        if (wayPoints != null && wayPoints.size() > 0) {
-            Point firstPoint = wayPoints.get(wayPoints.size()/2);
-            path.moveTo(firstPoint.getX(), firstPoint.getY());
-            for (int i = 2; i < wayPoints.size(); i++) {
-                path.lineTo(wayPoints.get(i).getX(), wayPoints.get(i).getY());
+            for (Point p : wayPoints) {
+                path.lineTo(p.getX(), p.getY());
             }
         }
         return path;
