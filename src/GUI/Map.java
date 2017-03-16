@@ -1,9 +1,6 @@
 package GUI;
 
-import Graph.Grid;
-import Graph.Link;
-import Graph.Node;
-import Graph.QueueServer;
+import Graph.*;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.layout.GridPane;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
@@ -158,6 +155,35 @@ public class Map extends GridPane {
         map.setMapMarkerList(mapMarkerDots);
     }
 
+
+    public void drawRoutes(Vehicle[] vehicles){
+        List<MapPolygon> polylines = new ArrayList<>();
+        for (Vehicle veh :
+                vehicles) {
+            List<Coordinate> coords = new ArrayList<>();
+            List<Link> route = veh.getRoute();
+            for (int i = 0; i < route.size(); i++) {
+//                List<Coordinate> line = route.get(i).getPolyline().getCoordinates();
+//                for(Coordinate c : line){
+//                    coords.add(c);
+//                }
+                Coordinate s = new Coordinate(route.get(i).getSource().getLatitude(), route.get(i).getSource().getLongitude());
+                Coordinate t = new Coordinate(route.get(i).getTarget().getLatitude(), route.get(i).getTarget().getLongitude());
+                coords.add(s); coords.add(t);
+            }
+            polylines.add(new MapPolyLine(coords));
+        }
+        map.setMapPolygonList(polylines);
+    }
+
+    public void drawGrid(HashMap<Integer, Link> linkMap){
+        List<MapPolygon> poly = new ArrayList<>();
+        for(java.util.Map.Entry<Integer, Link> entry : linkMap.entrySet()){
+            Link link = entry.getValue();
+            poly.add(new MapPolyLine(link.getPolyline().getCoordinates()));
+        }
+        map.setMapPolygonList(poly);
+    }
 
 
     public void drawBounds(){
