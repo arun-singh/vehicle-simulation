@@ -14,6 +14,7 @@ public class Vehicle implements Comparable{
     private int ID;
     private double earliestExitTime;
     private List<Link> route = new ArrayList<>();
+    private List<Link> seen = new ArrayList<>();
     private int linkCounter = 0;
     private boolean onLastLink = false;
     private double startTime, journeyTime;
@@ -135,5 +136,9 @@ public class Vehicle implements Comparable{
 
     public void setStartTime(double startTime) {
         this.startTime = startTime;
+    }
+
+    public List<Link> getSeen() {
+        return seen;
     }
 }
