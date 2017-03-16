@@ -54,7 +54,7 @@ public class Link{
     }
 
     public double speedDensity(double time){
-        double k = 0.001;//runningDensity(time);
+        double k = runningDensity(time);
         //System.out.println(k);
         if(k < kMin)
             return vFree;

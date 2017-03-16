@@ -24,7 +24,7 @@ public class Simulate {
     boolean randomise = false;
     private Statistics stats;
 
-    public int totalVehicles = 100;
+    public int totalVehicles = 10000;
     int roadLengthMax = 1000;
     int roadLengthMin = 100;
     int minLookBack = 1;
@@ -59,9 +59,9 @@ public class Simulate {
         int vehiclesLeft = -1;
         while (vehiclesLeft != 0) {
             // For all links calculate density
-            for (Map.Entry<Integer, Link> entry : grid.getLinkMap().entrySet()) {
-                entry.getValue().setRunningDensity(entry.getValue().runningDensity(step));
-            }
+//            for (Map.Entry<Integer, Link> entry : grid.getLinkMap().entrySet()) {
+//                entry.getValue().setRunningDensity(entry.getValue().runningDensity(step));
+//            }
 
             // For all links process turns
             for (Map.Entry<Integer, Link> entry : grid.getLinkMap().entrySet()) {
@@ -85,7 +85,7 @@ public class Simulate {
 //            } catch (InterruptedException e) {
 //                e.printStackTrace();
 //            }
-            ///Statistics.diagnostics(grid.getLinkMap());
+            //Statistics.diagnostics(grid.getLinkMap());
             step++;
         }
         //stats = new Statistics(vehiclesMap, shockwavesGenerated, vehicles, grid.getLinkMap(), totalVehicles);
@@ -108,8 +108,6 @@ public class Simulate {
             }
             vehicles[i] = vehicle;
         }
-
-        //GUI.Map.getInstance().drawRoutes(vehicles);
 
         for (int i = 0; i < totalVehicles; i++) {
             vehicles[i].getRoute().get(0).getInputQueue().push(vehicles[i], 0.0);

@@ -224,6 +224,7 @@ public class Grid {
         int serverSize = next.getServers().size();
 
         int serverIndex = -1;
+        int count = 0;
         while(serverSize!=0){
             try {
                 serverIndex = serverSize == 1 ? 0 : ran.nextInt((serverSize - 1) + 1);
@@ -236,6 +237,8 @@ public class Grid {
                 break;
             route.add(next);
             serverSize = next.getServers().size();
+            count++;
+            if(count==20) break;
         }
         return route;
     }

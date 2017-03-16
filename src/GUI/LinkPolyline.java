@@ -32,7 +32,7 @@ public class LinkPolyline extends MapPolygonImpl{
         super(null, null, points);
         this.link = link;
         setColor(Color.BLACK);
-        setStroke(new BasicStroke(20));
+        setStroke(new BasicStroke(3));
         setVisible(true);
         setCoordinates(points);
     }
@@ -41,7 +41,7 @@ public class LinkPolyline extends MapPolygonImpl{
     public void paint(Graphics g, List<Point> wayPoints) {
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setColor(link.getQueue().size() > 0 ? Color.red : Color.green);
-        g2d.setStroke(new BasicStroke(4));
+        g2d.setStroke(new BasicStroke(2));
         Path2D path = buildPath(wayPoints);
         g2d.draw(path);
         g2d.dispose();
