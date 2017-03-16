@@ -31,6 +31,7 @@ public class Link{
     private OutputQueue outputQueue = new OutputQueue(this);
     private boolean accessable;
     private int connectivity;
+    private List<Coordinate> coords = new ArrayList<>();
 
     public Link(int id, Node source, Node target){
         this.id = id;
@@ -215,5 +216,13 @@ public class Link{
 
     public void setConnectivity(int connectivity) {
         this.connectivity = connectivity;
+    }
+
+    public List<Coordinate> getCoords() {
+        return coords;
+    }
+
+    public void setCoords(List<Coordinate> coords) {
+        this.coords = coords;
     }
 }
