@@ -59,7 +59,7 @@ public class Simulate {
         int step = 0;
         int vehiclesLeft = -1;
         while (vehiclesLeft != 0) {
-            // For all links calculate density
+            /// For all links calculate density
 //            for (Map.Entry<Integer, Link> entry : grid.getLinkMap().entrySet()) {
 //                entry.getValue().setRunningDensity(entry.getValue().runningDensity(step));
 //            }
