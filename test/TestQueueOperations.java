@@ -140,6 +140,7 @@ public class TestQueueOperations {
         link.setQueue(queue);
         link.setLength(40);
         link.setLanes(1);
+        queue.setCapacity(6);
 
         Vehicle v1 = new Vehicle(3);
         v1.setLength(4);
@@ -173,6 +174,50 @@ public class TestQueueOperations {
         queue.push(v4);
         double densityFourCar = link.runningDensity(time);
         assertThat(densityFourCar, greaterThan(densityThreeCar));
+    }
+
+    @Test
+    public void testRunningLength(){
+        Queue queue = new Queue();
+        Link link = new Link(1);
+        link.setQueue(queue);
+        link.setLength(16);
+        link.setLanes(1);
+        queue.setCapacity(((int)link.getLength())/6);
+
+        Vehicle v1 = new Vehicle(3);
+        v1.setLength(4);
+        Vehicle v2 = new Vehicle(2);
+        v2.setLength(4);
+        Vehicle v3 = new Vehicle(3);
+        v3.setLength(4);
+        Vehicle v4 = new Vehicle(4);
+        v4.setLength(4);
+
+        v1.setEarliestExitTime(9);
+        v2.setEarliestExitTime(2);
+        v3.setEarliestExitTime(4);
+        v4.setEarliestExitTime(1);
+
+        link.setkMin(0);
+        link.setkMax(5);
+        link.setvMin(1);
+        link.setvFree(5);
+
+        double time = 10;
+        double runningLength = queue.runningLength(time);
+        double runningLength2 = link.getLength() - (queue.queueLength(time)/link.getLanes());
+        System.out.println(runningLength + "," + runningLength2);
+        queue.push(v1);
+
+
+
+        queue.push(v2);
+        queue.push(v3);
+        queue.push(v4);
+
+
+
     }
 
     @Test
