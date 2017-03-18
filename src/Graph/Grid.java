@@ -40,8 +40,6 @@ public class Grid {
         ResultSet rs = Query_V3.getLinkFromBox(maxLat, minLat, maxLon, minLon, Query_V3.carFilter);
         List<Node[]> carsFilter = generateNodePairs(rs);
 
-        //GH.request();
-
         generateLinks(carsFilter, linkLengths, oneway, linestring);
         Link.createServers(linkMap);
 
@@ -70,33 +68,6 @@ public class Grid {
                 .mapToInt(l->l.getValue().getQueue().getCapacity())
                 .sum();
 
-        System.out.println(totalCap);
-
-       // Map.getInstance().drawMapMarkers(carsFilter);
-      //Map.getInstance().drawGrid(linkMap);
-
-        List<Node[]> targs = MapUtil.getTargetLinks(carsFilter, new Node(52.415984, -1.8059506));
-       // 52.4153049, -1.8083075
-
-        List<Link> find = linkMap.entrySet().stream().filter(l->l.getValue().getSource().equals(new Node(52.415984, -1.8059506)) && l.getValue().getTarget().equals(new Node(52.416761, -1.8066203)))
-                .map(java.util.Map.Entry::getValue)
-                .collect(Collectors.toList());
-        List<Coordinate> coord = find.get(0).getPolyline().getCoordinates();
-        List<Coordinate> newCoord = new ArrayList<>();
-        MapMarker m1 = new MapMarkerDot(new Coordinate(52.415981,-1.8059502));
-        MapMarker m2 = new MapMarkerDot(new Coordinate(52.416769, -1.8066207));
-        //Map.getInstance().getMap().addMapMarker(m1);
-        //Map.getInstance().getMap().addMapMarker(m2);
-
-        //for(Coordinate c : coord){
-            newCoord.add(new Coordinate(52.415981,-1.8059502));
-            newCoord.add(new Coordinate(52.416769, -1.8066207));
-        //}
-        Collections.reverse(newCoord);
-        //MapPolygon line = new MapPolyLine(newCoord);
-
-       // Map.getInstance().getMap().addMapPolygon(line);
-        System.out.println(Map.getInstance().getMap().getMapPolygonList().size());
     }
 
     private List<Node[]> generateNodePairs(ResultSet rs){
@@ -238,7 +209,7 @@ public class Grid {
             route.add(next);
             serverSize = next.getServers().size();
             count++;
-            if(count==20) break;
+            if(count==30) break;
         }
         return route;
     }
