@@ -24,7 +24,7 @@ public class Simulate {
     boolean randomise = false;
     private Statistics stats;
 
-    public int totalVehicles = 10000;
+    public int totalVehicles = 1000;
     int roadLengthMax = 1000;
     int roadLengthMin = 100;
     int minLookBack = 1;
@@ -41,15 +41,16 @@ public class Simulate {
     public Simulate() {
     }
 
-    public Simulate(int totalVehicles) {
+    public Simulate(int totalVehicles, double[] coords) {
         this.totalVehicles = totalVehicles;
+        this.grid = new Grid(coords[0], coords[1], coords[2], coords[3]);
     }
 
     public Statistics run() {
-        System.out.println("Caled");
         shockwavesGenerated = 0;
         List<Link> inputLinks = MapUtil.getInputLinks(grid.getLinkMap(), grid.getAverageConnectivity());
         LinkedHashMap<Integer, Integer> vehiclesMap = new LinkedHashMap<>();
+        LinkedHashMap<Integer, Integer> shockMap = new LinkedHashMap<>();
 
         Vehicle[] vehicles = new Vehicle[totalVehicles];
         int pushed = 0;
@@ -74,22 +75,21 @@ public class Simulate {
                 queue.pushWaiting(step);
 
             vehiclesLeft = totalVehicles - Statistics.totalVehiclesOutput(grid.getLinkMap());
-//            double totalDensity = grid.getLinkMap().entrySet().stream().mapToDouble(l->l.getValue().getRunningDensity()).sum();
-//            double avgDensity = totalDensity / grid.getLinkMap().size();
-//            int vehiclesonqueue = grid.getLinkMap().entrySet().stream().mapToInt(l->l.getValue().getQueue().size()).sum();
 
             System.out.println(vehiclesLeft);
             vehiclesMap.put(step, vehiclesLeft);
-//            try {
-//                Thread.sleep(100);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
+            shockMap.put(step, shockwavesGenerated);
+            try {
+                Thread.sleep(150);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             //Statistics.diagnostics(grid.getLinkMap());
             step++;
         }
-        //stats = new Statistics(vehiclesMap, shockwavesGenerated, vehicles, grid.getLinkMap(), totalVehicles);
-        return null;
+        stats = new Statistics(vehiclesMap, shockwavesGenerated, vehicles, grid.getLinkMap(), totalVehicles, shockMap);
+        GUI.Map.getInstance().getMap().removeAllMapPolygons();
+        return stats;
     }
 
     private Vehicle[] generateVehicles(Vehicle[] vehicles, List<Link> inputLinks) {
@@ -260,6 +260,29 @@ public class Simulate {
         double density = K1 + K2;
         double diff = flow / density;
         return diff;
+    }
+
+    public void isGridLocked(){
+        List<Link> remaining = grid.getLinkMap().entrySet().stream()
+                .filter(l->l.getValue().getQueue().size()>0)
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
+
+        for(Link link : remaining){
+            List<Link> grid = new ArrayList<>();
+
+            Link next = link.getQueue().getHead().getNextLink();
+            grid.add(next);
+            while(!next.isFree()){
+                next = next.getQueue().getHead().getNextLink();
+                if(grid.get(0).equals(next)){
+                    System.out.println("Gridlocked");
+                    return;
+                }else{
+                    grid.add(next);
+                }
+            }
+        }
     }
 
     public static void main(String[] args) {
