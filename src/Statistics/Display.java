@@ -22,7 +22,7 @@ public class Display extends Application {
         GridPane gridPane = new GridPane();
         Scene scene = new Scene(gridPane);
 
-        List<List<Statistics>> stats = Statistics.increaseCars(10000, 50000, 10000, 1);
+        List<List<Statistics>> stats = Statistics.increaseCars(10000, 50000, 10000, 1, new double[]{});
         VBox time = Statistics.drawCarStats(stats, "Total number of cars", "Simulation time");
         VBox shockwaves  = Statistics.drawShockwaves(stats, "Total number of cars", "Shockwaves");
         VBox vehiclesRemaining = Statistics.vehiclesRemaining(stats, "Time", "Vehicles remaining");

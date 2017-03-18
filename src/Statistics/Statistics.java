@@ -3,6 +3,7 @@ package Statistics;
 import Graph.Link;
 import Graph.Vehicle;
 import Simulation.Simulate;
+import com.sun.org.glassfish.external.statistics.Statistic;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -24,13 +25,16 @@ public class Statistics {
     private HashMap<Integer, Link> linkMap;
     private int cars;
     HashMap<Integer, Integer> vehiclesMap;
+    HashMap<Integer, Integer> shockMap;
 
-    public Statistics(HashMap<Integer, Integer> vehiclesMap, int shockwavesGenerated,  Vehicle[] vehicles, HashMap<Integer, Link> linkMap, int cars){
+    public Statistics(HashMap<Integer, Integer> vehiclesMap, int shockwavesGenerated,  Vehicle[] vehicles, HashMap<Integer, Link> linkMap, int cars,
+                      HashMap<Integer, Integer> shockMap){
         this.vehiclesMap = vehiclesMap;
         this.shockwavesGenerated = shockwavesGenerated;
         this.vehicles = vehicles;
         this.linkMap = linkMap;
         this.cars = cars;
+        this.shockMap = shockMap;
        // report(finishStep, shockwavesGenerated,  vehicles, linkMap);
     }
 
@@ -45,14 +49,14 @@ public class Statistics {
         System.out.println("Actual greater than estimate average journey: " +  longer);
     }
 
-    public static List<List<Statistics>> increaseCars(int carsBegin, int carsEnd, int increment, int runs){
+    public static List<List<Statistics>> increaseCars(int carsBegin, int carsEnd, int increment, int runs, double[] coords){
         List<List<Statistics>> stats = new ArrayList<>();
         int cars = carsBegin;
         while(cars <= carsEnd){
-            System.out.println(cars);
+            System.out.println((cars/((double)carsEnd))+"%");
             List<Statistics> perCar = new ArrayList<>();
             for(int i = 0; i < runs; i++){
-                Simulate simulate = new Simulate(cars);
+                Simulate simulate = new Simulate(cars, coords);
                 perCar.add(simulate.run());
             }
             stats.add(perCar);
@@ -89,6 +93,23 @@ public class Statistics {
             int cars = stat.get(0).getCars();
             double averageFinish = stat.stream().mapToDouble(s->s.getShockwavesGenerated()).sum() / stat.size();
             series.getData().add(new XYChart.Data<>(cars, averageFinish));
+        }
+        return box;
+    }
+
+    public static VBox drawShockwaveSingleJourney(List<List<Statistics>> results, String xLabel, String yLabel){
+        LineChart chart = createChart(xLabel, yLabel);
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        chart.getData().add(series);
+        VBox box = new VBox();
+        box.getChildren().add(chart);
+
+        List<Statistics> ls = results.get(results.size()-1);
+        Statistics s = ls.get(0);
+        HashMap<Integer, Integer> swm = s.shockMap;
+
+        for(Map.Entry<Integer, Integer> entry : swm.entrySet()){
+            series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
         }
         return box;
     }
