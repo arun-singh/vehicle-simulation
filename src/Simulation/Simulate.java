@@ -88,6 +88,7 @@ public class Simulate {
             step++;
         }
         stats = new Statistics(vehiclesMap, shockwavesGenerated, vehicles, grid.getLinkMap(), totalVehicles, shockMap);
+        System.out.println(shockwavesGenerated);
         GUI.Map.getInstance().getMap().removeAllMapPolygons();
         return stats;
     }

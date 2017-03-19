@@ -37,11 +37,10 @@ public class Map extends GridPane {
 
     public Map() {
         super();
-        map.setPreferredSize(new Dimension(Main.WIDTH, Main.HEIGHT - 50));
+        map.setPreferredSize(new Dimension(Main.WIDTH, Main.HEIGHT));
         map.setSize(Main.WIDTH, Main.HEIGHT);
         map.setMapPolygonsVisible(true);
         map.setVisible(true);
-        map.setToolTipText("");
         createMap();
     }
 
@@ -53,7 +52,7 @@ public class Map extends GridPane {
 
     private void createSwingContent(final SwingNode swingNode) {
         map.setDisplayPosition(new Coordinate((52), (-1.6)), ZOOM_LEVEL);
-        DefaultMapController cont = new DefaultMapController(map);
+        MapController cont = new MapController(map);
         cont.setMovementMouseButton(MouseEvent.BUTTON1);
         map.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1, true));
         swingNode.setContent(map);
@@ -67,7 +66,8 @@ public class Map extends GridPane {
     }
 
     public void update(){
-        map.repaint();
+        //map.repaint();
+        map.paintImmediately(0, 0, map.getWidth(), map.getHeight());
     }
 
     public void drawMapMarkers(java.util.List<Node[]> coords){

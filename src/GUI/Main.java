@@ -17,10 +17,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 
-import java.awt.*;
-import java.awt.Button;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javafx.scene.control.Button;
+import org.openstreetmap.gui.jmapviewer.MapMarkerDot;
+
 import java.util.*;
 import java.util.List;
 
@@ -35,6 +34,9 @@ public class Main extends Application{
 
     double maxLat, minLat, maxLon, minLon;
     boolean statsMode = false;
+    static CheckBox recordBox;
+    CoordPane coordPane = new CoordPane();
+    Map map = Map.getInstance();
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -42,7 +44,8 @@ public class Main extends Application{
         Main.primaryStage.setWidth(WIDTH);
         Main.primaryStage.setHeight(HEIGHT);
 
-        Map map = Map.getInstance();
+        Main.recordBox = new CheckBox();
+
         //TODO: Get box coords
         java.util.List<double[]> latlon = new ArrayList<>();
         latlon.add(new double[]{52.4432354, -1.9366254});
@@ -57,12 +60,18 @@ public class Main extends Application{
 
         GridPane gp = new GridPane();
 
-        javafx.scene.control.Button control = new javafx.scene.control.Button("Start");
+        Button control = new Button("Start");
         control.setOnAction(this::ex);
         VBox m = new VBox(map);
+        map.getMap().setDisplayPosition(new Coordinate((52.3800027+52.6299987)/2, (-2.1999973 + -1.7000001)/2), 10);
+        map.getMap().addMapMarker(new MapMarkerDot(new Coordinate(52.6299987, -2.1999973)));
+        map.getMap().addMapMarker(new MapMarkerDot(new Coordinate(52.3800027, -1.7000001)));
+
 
         gp.add(m, 0, 0);
         gp.add(control, 0, 1);
+        gp.add(recordBox, 1, 1);
+        gp.add(coordPane, 0, 2);
 
 //        latlon.add(new double[]{52.422039, -1.813235});
 //        latlon.add(new double[]{52.421541, -1.776757});
@@ -73,7 +82,6 @@ public class Main extends Application{
         minLon = Grid.minLon(latlon);
         maxLon = Grid.maxLon(latlon);
 
-        map.getMap().setDisplayPosition(new Coordinate(52.4407134, -1.9255364), 15);
 
         Scene scene = new Scene(gp);
         Main.primaryStage.setScene(scene);
@@ -81,6 +89,17 @@ public class Main extends Application{
     }
 
     public void ex(javafx.event.ActionEvent event){
+
+        maxLat = Double.parseDouble(coordPane._maxLatText.getText());
+        minLat = Double.parseDouble(coordPane._minLatText.getText());
+        maxLon = Double.parseDouble(coordPane._maxLonText.getText());
+        minLon = Double.parseDouble(coordPane._minLonText.getText());
+
+        double midLat = (minLat + maxLat) / 2;
+        double midLon = (minLon + maxLon) / 2;
+
+        map.getMap().setDisplayPosition(new Coordinate(midLat, midLon), 15);
+
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
@@ -129,7 +148,6 @@ public class Main extends Application{
         gridPane.add(shockwaves, 0, 1);
         gridPane.add(vehiclesRemaining, 1, 0);
         gridPane.add(shockwaveSingle, 1, 1);
-
 
         Scene scene = new Scene(gridPane);
         graphs.setScene(scene);

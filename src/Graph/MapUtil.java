@@ -2,6 +2,8 @@ package Graph;
 
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,6 +94,50 @@ public class MapUtil {
                 .collect(Collectors.toList());
     }
 
+    public static String maxLat(Coordinate one, Coordinate two, Coordinate three, Coordinate four){
+        double largest = one.getLat();
+        if(two.getLat()>largest)
+            largest = two.getLat();
+        if(three.getLat()>largest)
+            largest = three.getLat();
+        if(four.getLat()>largest)
+            largest = four.getLat();
+        return Double.toString(round(largest,7));
+    }
+
+    public static String minLat(Coordinate one, Coordinate two, Coordinate three, Coordinate four){
+        double smallest = one.getLat();
+        if(two.getLat()<smallest)
+            smallest = two.getLat();
+        if(three.getLat()<smallest)
+            smallest = three.getLat();
+        if(four.getLat()<smallest)
+            smallest = four.getLat();
+        return Double.toString(round(smallest, 7));
+    }
+
+    public static String minLon(Coordinate one, Coordinate two, Coordinate three, Coordinate four){
+        double smallest = one.getLon();
+        if(two.getLon()<smallest)
+            smallest = two.getLon();
+        if(three.getLon()<smallest)
+            smallest = three.getLon();
+        if(four.getLon()<smallest)
+            smallest = four.getLon();
+        return Double.toString(round(smallest, 7));
+    }
+
+    public static String maxLon(Coordinate one, Coordinate two, Coordinate three, Coordinate four){
+        double largest = one.getLon();
+        if(two.getLon()>largest)
+            largest = two.getLon();
+        if(three.getLon()>largest)
+            largest = three.getLon();
+        if(four.getLon()>largest)
+            largest = four.getLon();
+        return Double.toString(round(largest, 7));
+    }
+
     public static double getNodesDistance(Coordinate startCoord, Coordinate endCoord) {
         double crowFliesLength;
         double R = 6371000; // Earths radius
@@ -115,4 +161,11 @@ public class MapUtil {
     }
 
 
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
 }

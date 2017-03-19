@@ -1,6 +1,7 @@
 package Graph;
 
 import Database.Query_V3;
+import GUI.Main;
 import GUI.Map;
 import GUI.MapPolyLine;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
@@ -42,6 +43,7 @@ public class Grid {
 
         generateLinks(carsFilter, linkLengths, oneway, linestring);
         Link.createServers(linkMap);
+        //Map.getInstance().drawMapMarkers(carsFilter);
 
         // Number of connections
         List<Node[]> unconnected = new ArrayList<>();
@@ -154,6 +156,7 @@ public class Grid {
             }
         }
         Map.getInstance().getMap().setMapPolygonList(polys);
+        //Map.getInstance().getMap().paintImmediately(0, 0, Map.getInstance().getMap().getWidth(), Map.getInstance().getMap().getHeight());
     }
 
     public void generateOneWayLinks(List<Node[]> nodePairs, List<Double> lengths) {
