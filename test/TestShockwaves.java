@@ -5,13 +5,11 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsIn.isIn;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 
 /**
@@ -76,7 +74,7 @@ public class TestShockwaves {
         Queue queueTwo = new Queue(QUEUE_SIZE, linkTwo, null);
         linkOne.setQueue(queueOne);
         linkTwo.setQueue(queueTwo);
-        linkOne.getServers().add(new QueueServer(linkOne, linkTwo, QueueServer.Type.NORMAL));
+        linkOne.getServers().add(new Server(linkOne, linkTwo, Server.Type.NORMAL));
 
         for(int i = 1; i <= QUEUE_SIZE; i++){
             int length =  ran.nextInt(maxCarLength - minCarLength + 1) + minCarLength;
@@ -107,7 +105,7 @@ public class TestShockwaves {
         Queue queueTwo = new Queue(QUEUE_SIZE, linkTwo, null);
         linkOne.setQueue(queueOne);
         linkTwo.setQueue(queueTwo);
-        QueueServer server = new QueueServer(linkOne, linkTwo, QueueServer.Type.NORMAL);
+        Server server = new Server(linkOne, linkTwo, Server.Type.NORMAL);
         linkOne.getServers().add(server);
 
         for(int i = 1; i <= QUEUE_SIZE; i++){

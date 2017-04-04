@@ -3,7 +3,7 @@ package Graph;
 /**
  * Created by Arun on 26/01/2017.
  */
-public class QueueServer {
+public class Server {
 
     private Node location;
     private Link incoming, outgoing;
@@ -21,7 +21,7 @@ public class QueueServer {
         MERGE
     }
 
-    public QueueServer(Link incoming, Link outgoing, Type type){
+    public Server(Link incoming, Link outgoing, Type type){
         this.incoming = incoming;
         this.outgoing = outgoing;
         this.location = incoming.getTarget();

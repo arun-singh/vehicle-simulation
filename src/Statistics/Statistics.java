@@ -191,7 +191,7 @@ public class Statistics {
 
     public static int totalVehiclesOutput(HashMap<Integer, Link> linkMap){
         return linkMap.entrySet().stream()
-                .mapToInt(l->l.getValue().getOutputQueue().getReceived().size())
+                .mapToInt(l->l.getValue().getExitPoint().getReceived().size())
                 .sum();
     }
 

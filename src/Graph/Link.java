@@ -23,12 +23,12 @@ public class Link{
     private double vMin, vFree, kMin, kMax;
     private LinkPolyline polyline;
     private int lookBackLimit;
-    private List<QueueServer> servers = new ArrayList<>();
+    private List<Server> servers = new ArrayList<>();
     private int id;
     private int delay = 0;
     private List<Link> adjacencyList;
     private EntryPoint entryPoint = new EntryPoint(this);
-    private ExitPoint outputQueue = new ExitPoint(this);
+    private ExitPoint exitPoint = new ExitPoint(this);
     private boolean accessable;
     private int connectivity;
     private List<Coordinate> coords = new ArrayList<>();
@@ -116,7 +116,7 @@ public class Link{
 
             adjacent.stream()
                 .forEach(l -> entry.getValue().getServers().add(
-                    new QueueServer(entry.getValue(), l, QueueServer.Type.NORMAL)));
+                    new Server(entry.getValue(), l, Server.Type.NORMAL)));
         }
     }
 
@@ -158,7 +158,7 @@ public class Link{
     public void setLookBackLimit(int lookBackLimit) {
         this.lookBackLimit = lookBackLimit;
     }
-    public List<QueueServer> getServers() {
+    public List<Server> getServers() {
         return servers;
     }
     public int getId() {
@@ -199,8 +199,8 @@ public class Link{
         return entryPoint;
     }
 
-    public ExitPoint getOutputQueue() {
-        return outputQueue;
+    public ExitPoint getExitPoint() {
+        return exitPoint;
     }
 
     public void setAccessable(boolean accessable) {

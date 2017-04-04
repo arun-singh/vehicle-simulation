@@ -151,7 +151,7 @@ public class Simulate {
         if (link.getServers().size() == 0)
             return;
 
-        for (QueueServer server : link.getServers()) {
+        for (Server server : link.getServers()) {
             boolean delayProcessed = processPocketDelay(server, link, time);
             if (delayProcessed) continue;
 
@@ -163,7 +163,7 @@ public class Simulate {
         }
     }
 
-    public boolean processPocketDelay(QueueServer server, Link link, double time) {
+    public boolean processPocketDelay(Server server, Link link, double time) {
         double pocketDelay = server.getPocketDelayedUntil();
         if (pocketDelay > 0) {
             server.setPocketDelayedUntil(pocketDelay - ONE_STEP);
@@ -181,7 +181,7 @@ public class Simulate {
         }
     }
 
-    public boolean calculateDelay(QueueServer server, double time) {
+    public boolean calculateDelay(Server server, double time) {
         boolean isFree = server.getOutgoing().isFree();
         int cap = server.getOutgoing().getQueue().getCapacity();
         if (!isFree) {
@@ -194,17 +194,17 @@ public class Simulate {
         return true;
     }
 
-    public void processVehicle(Vehicle ve, Link current, QueueServer server, double time) {
+    public void processVehicle(Vehicle ve, Link current, Server server, double time) {
         if (ve.isOnLastLink()) {
             int size = ve.getRoute().size();
-            ve.getRoute().get(size - 1).getOutputQueue().received(ve, time);
+            ve.getRoute().get(size - 1).getExitPoint().received(ve, time);
         } else {
             server.getOutgoing().getQueue().push(ve);
         }
         current.getQueue().remove(ve);
     }
 
-    public void processOutgoingVehicles(Link current, QueueServer server, double time) {
+    public void processOutgoingVehicles(Link current, Server server, double time) {
         int lookback = current.getLookBackLimit();
         List<Vehicle> queued = QUtil.queuedVehicles(current.getQueue(), time);
         int freeSpaces = server.getOutgoing().getQueue().getCapacity() - server.getOutgoing().getQueue().size();

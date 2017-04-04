@@ -17,62 +17,47 @@ import java.util.regex.Pattern;
 public class Grid {
 
     private LinkedHashMap<Integer, Link> linkMap;
-    static Random ran = new Random();
-    private List<Node[]> pairs;
-    private List<Double> linkLengths;
-    private List<Boolean> oneway;
-    private List<List<Coordinate>> linestring;
+    private static Random ran = new Random();
     private int averageConnectivity;
+    private int maxCarLength = 4;
 
-    int maxCarLength = 4;
-    int minLanes = 1;
-    int maxLane = 2;
 
     public Grid(double maxLat, double minLat, double maxLon, double minLon){
         linkMap = new LinkedHashMap<>();
         Map.getInstance().setGrid(this);
         System.out.println("Querying database");
         ResultSet rs = Query_V3.getLinkFromBox(maxLat, minLat, maxLon, minLon, Query_V3.carFilter);
-        List<Node[]> carsFilter = generateNodePairs(rs);
-        System.out.println("Generating links");
-        generateLinks(carsFilter, linkLengths, oneway, linestring);
+        generateNodePairs(rs);
         System.out.println(" Creating servers");
         Link.createServers(linkMap);
         System.out.println("Finished server creation");
        // Map.getInstance().drawMapMarkers(carsFilter);
 
-        // Number of connections
-//        List<Node[]> unconnected = new ArrayList<>();
-//        for(java.util.Map.Entry<Integer, Link> entry : linkMap.entrySet()){
-//            int connections = MapUtil.connections(entry.getValue());
-//            if(connections==0)
-//                unconnected.add(new Node[]{entry.getValue().getSource(), entry.getValue().getTarget()});
-//            entry.getValue().setConnectivity(connections);
-//            MapUtil.cache.clear();
-//        }
-//
-//        int totalConnections = linkMap.entrySet().stream().mapToInt(l->l.getValue().getConnectivity()).sum();
-//        int averageconnections = totalConnections/linkMap.size();
-//        setAverageConnectivity(averageconnections);
+        /*
 
-//        //One way
-//        int oneWayCount = 0;
-//        for(java.util.Map.Entry<Integer, Link> entry : linkMap.entrySet()) {
-//            boolean oneWay = MapUtil.isLinkOneWay(entry.getValue(), linkMap);
-//            if (oneWay) oneWayCount++;
-//        }
-//
-//        int totalCap = linkMap.entrySet().stream()
-//                .mapToInt(l->l.getValue().getQueue().getCapacity())
-//                .sum();
+        !!Number of connections - THIS TAKES TOO LONG FOR LARGE GRIDS!!
+
+        List<Node[]> unconnected = new ArrayList<>();
+        for(java.util.Map.Entry<Integer, Link> entry : linkMap.entrySet()){
+            int connections = MapUtil.connections(entry.getValue());
+            if(connections==0)
+                unconnected.add(new Node[]{entry.getValue().getSource(), entry.getValue().getTarget()});
+            entry.getValue().setConnectivity(connections);
+            MapUtil.cache.clear();
+        }
+
+        int totalConnections = linkMap.entrySet().stream().mapToInt(l->l.getValue().getConnectivity()).sum();
+        int averageconnections = totalConnections/linkMap.size();
+        setAverageConnectivity(averageconnections);
+         */
 
     }
 
-    private List<Node[]> generateNodePairs(ResultSet rs){
+    private void generateNodePairs(ResultSet rs){
         List<Node[]> pairs = new ArrayList<>();
-        linkLengths = new ArrayList<>();
-        oneway = new ArrayList<>();
-        linestring = new ArrayList<>();
+        List<Double> linkLengths = new ArrayList<>();
+        List<Boolean> oneway = new ArrayList<>();
+        List<List<Coordinate>> linestring = new ArrayList<>();
 
         try {
             while(rs.next()){
@@ -95,26 +80,17 @@ public class Grid {
                 oneway.add(ow == 0 ? Boolean.TRUE : Boolean.FALSE);
                 linkLengths.add(length);
             }
-            return pairs;
+
+            generateLinks(pairs, linkLengths, oneway, linestring);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
-    }
-
-
-    public List<Link> oneRouteDemo(HashMap<Integer, Link> linkMap){
-        int[] ids = new int[]{1170, 1081, 1210, 911};//911, 845, 548, 684, 428, 1143, 344, 377, 678, 398, 856, 754, 1027, 752, 405, 193, 477, 832, 265, 29};
-        //int[] ids = new int[]{218, 388, 230};
-
-        List<Link> route = new ArrayList<>();
-        for(Integer id : ids){
-            route.add(MapUtil.getLinkById(linkMap, id));
-        }
-        return route;
     }
 
     private void generateLinks(List<Node[]> nodePairs, List<Double> lengths, List<Boolean> oneway, List<List<Coordinate>> linestring) {
+        System.out.println("Generating links");
+
         int seen = 0;
         List<MapPolygon> polys = new ArrayList<>();
         for(int i = 0; i<nodePairs.size(); i++) {
@@ -303,38 +279,6 @@ public class Grid {
     }
 
     public LinkedHashMap<Integer, Link> getLinkMap(){ return linkMap; }
-    public List<Node[]> getPairs(){return pairs;}
-    public List<Double> getLinkLengths(){return linkLengths;}
-
-    public static void main(String[] args){
-//        List<double[]> latlon = new ArrayList<>();
-//        latlon.add(new double[]{52.4432354, -1.9366254});
-//        latlon.add(new double[]{52.437009, -1.9293171});
-//        latlon.add(new double[]{52.4469844, -1.9277054});
-//        latlon.add(new double[]{52.4407134, -1.9255364});
-//
-//        double maxLat = Grid.maxLat(latlon);
-//        double minLat = Grid.minLat(latlon);
-//        double minLon = Grid.minLon(latlon);
-//        double maxLon = Grid.maxLon(latlon);
-//
-//        System.out.println("Max lat: " +maxLat);
-//        System.out.println("Min lat: " +minLat);
-//        System.out.println("Max lon: " +maxLon);
-//        System.out.println("Min lon: " +minLon);
-//        Grid grid = new Grid(52.4469844, 52.437009, -1.9366254, -1.9255364);
-
-        String toMatch = "LINESTRING(-1.9366622 52.443261,-1.9365741 52.4433323,-1.9359548 52.4438552)";
-        //Pattern patt = Pattern.compile("LINESTRING\\(((\\d\\.\\d+\\s\\d+\\.\\d+),)+");
-        String[] rem = toMatch.substring(10, toMatch.length()-1).replaceAll("\\(|\\)", "").split(",");
-        for(String str : rem){
-            System.out.println(str.split(" ")[1] + ", "  + str.split(" ")[0]);
-        }
-        Pattern patt = Pattern.compile("LINESTRING\\(" +
-                "((-?\\d+\\.\\d+\\s-?\\d+\\.\\d+),?+)" +
-                "\\)");
-
-    }
 
     public int getAverageConnectivity() {
         return averageConnectivity;

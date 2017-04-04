@@ -129,7 +129,7 @@ public class Map extends GridPane {
                                                 .collect(Collectors.toList());
 
         for(Link link : links){
-            //for(QueueServer server : link.getServers()){
+            //for(Server server : link.getServers()){
                 serverNodes.add(link.getSource());
             //}
         }

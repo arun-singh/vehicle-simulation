@@ -60,11 +60,11 @@ public class MapUtil {
 
     public static List<Integer> cache = new ArrayList<>();
     public static int connections(Link source){
-        List<QueueServer> servers = source.getServers();
+        List<Server> servers = source.getServers();
         if(servers.size()==0)
             return 0;
-        List<QueueServer> filtered = new ArrayList<>();
-        for(QueueServer qs : servers){
+        List<Server> filtered = new ArrayList<>();
+        for(Server qs : servers){
             if(cache.contains(qs.getOutgoing().getId()))
                 continue;
             filtered.add(qs);

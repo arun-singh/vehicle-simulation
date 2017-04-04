@@ -1,5 +1,5 @@
 import Graph.Link;
-import Graph.QueueServer;
+import Graph.Server;
 import Graph.Queue;
 import Simulation.Simulate;
 import org.junit.Assert;
@@ -8,8 +8,6 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
 
 /**
  * Created by Arun on 01/02/2017.
@@ -65,7 +63,7 @@ public class TestIntersectionHandling {
     @Test
     public void testSingleIntersection(){
         Simulate sim = new Simulate();
-        l1.getServers().add(new QueueServer(l1, l2, QueueServer.Type.NORMAL));
+        l1.getServers().add(new Server(l1, l2, Server.Type.NORMAL));
 
         List<Link> routeOne = new ArrayList<Link>(){{
             add(l2);
@@ -91,9 +89,9 @@ public class TestIntersectionHandling {
     public void testMultipleIntersections(){
         Simulate sim = new Simulate();
 
-        l1.getServers().add(new QueueServer(l1, l2, QueueServer.Type.NORMAL));
-        l1.getServers().add(new QueueServer(l1, l3, QueueServer.Type.NORMAL));
-        l2.getServers().add(new QueueServer(l2, l3, QueueServer.Type.MERGE));
+        l1.getServers().add(new Server(l1, l2, Server.Type.NORMAL));
+        l1.getServers().add(new Server(l1, l3, Server.Type.NORMAL));
+        l2.getServers().add(new Server(l2, l3, Server.Type.MERGE));
 
         List<Link> routeOne = new ArrayList<Link>(){{
             add(l2);
