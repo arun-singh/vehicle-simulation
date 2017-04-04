@@ -40,12 +40,10 @@ public class Display extends Application{
         Display.primaryStage.setHeight(HEIGHT);
 
         Display.recordBox = new CheckBox();
-
-        //TODO: Get box coords
         GridPane gp = new GridPane();
 
         Button control = new Button("Start");
-        control.setOnAction(this::ex);
+        control.setOnAction(this::execute);
         VBox m = new VBox(map);
         map.getMap().setDisplayPosition(new Coordinate((52.3800027+52.6299987)/2, (-2.1999973 + -1.7000001)/2), 10);
         map.getMap().addMapMarker(new MapMarkerDot(new Coordinate(52.6299987, -2.1999973)));
@@ -62,7 +60,7 @@ public class Display extends Application{
         Display.primaryStage.show();
     }
 
-    public void ex(javafx.event.ActionEvent event){
+    private void execute(javafx.event.ActionEvent event){
 
         maxLat = Double.parseDouble(coordPane._maxLatText.getText());
         minLat = Double.parseDouble(coordPane._minLatText.getText());
@@ -107,14 +105,14 @@ public class Display extends Application{
         thread.start();
     }
 
-    public void drawGraphs(List<List<Statistics>> stats){
+    private void drawGraphs(List<List<Statistics>> stats){
         Stage graphs = new Stage();
         graphs.setWidth(WIDTH);
         graphs.setHeight(HEIGHT);
 
         VBox time = Statistics.drawCarStats(stats, "Total number of cars", "Simulation time");
         VBox shockwaves  = Statistics.drawShockwaves(stats, "Total number of cars", "Shockwaves");
-        VBox vehiclesRemaining = Statistics.vehiclesRemaining(stats, "Time", "Vehicles remaining");
+        VBox vehiclesRemaining = Statistics.drawVehiclesRemaining(stats, "Time", "Vehicles remaining");
         VBox shockwaveSingle = Statistics.drawShockwaveSingleJourney(stats, "Time", "Shockwaves generated");
 
         GridPane gridPane = new GridPane();

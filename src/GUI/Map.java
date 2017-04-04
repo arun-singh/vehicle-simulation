@@ -26,7 +26,6 @@ public class Map extends GridPane {
     private List<MapMarker[]> markerPairs = new ArrayList<>();
     private final int ZOOM_LEVEL = 50;
     private static Map ourInstance = new Map();
-    int flag = 0;
 
     public Map() {
         super();
@@ -60,7 +59,6 @@ public class Map extends GridPane {
 
     public void update(){
         map.repaint();
-        //map.paintImmediately(0, 0, map.getWidth(), map.getHeight());
     }
 
     public void drawMapMarkers(java.util.List<Node[]> coords){

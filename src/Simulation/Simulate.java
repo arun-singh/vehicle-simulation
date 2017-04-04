@@ -15,19 +15,14 @@ public class Simulate {
 
     private final int ONE_STEP = 1;
     private static int vehicleCounter = 0;
-    public int shockwavesGenerated = 0;
+    private int shockwavesGenerated = 0;
     private Grid grid;
-    Random ran = new Random();
+    private Random ran = new Random();
     boolean randomise = false;
     private Statistics stats;
 
-    public int totalVehicles = 1000;
-    int roadLengthMax = 1000;
-    int roadLengthMin = 100;
-    int minLookBack = 1;
-    int maxLookBack = 10;
-    int minLanes = 1;
-    int maxLane = 2;
+    private int totalVehicles = 1000;
+
     int minCarLength = 4;
     int maxCarLength = 6;
 
@@ -115,37 +110,9 @@ public class Simulate {
         return vehicles;
     }
 
-    private void generateLinks(Node[] nodes, List<Integer[]> nodePairs, HashMap<Integer, Link> linkMap) {
-        for (int i = 0; i < nodePairs.size(); i++) {
-            for (int j = 0; j < 2; j++) {
-                int length = randomise ? ran.nextInt(roadLengthMax - roadLengthMin + 1) + roadLengthMin : roadLengthMax;
-                int capacity = length / maxCarLength;
-                if (capacity == 0)
-                    capacity = 1;
-                int id = (i * 2) + j;
 
-                Integer[] pair = nodePairs.get(i);
-                Node start = nodes[pair[j == 0 ? 0 : 1] - 1];
-                Node end = nodes[pair[j == 0 ? 1 : 0] - 1];
 
-                Link link = new Link(id, capacity, start, end);
-                link.setLength(length);
-                int lookBack = randomise ? ran.nextInt(maxLookBack - minLookBack + 1) + minLookBack : maxLookBack;
-                link.setLookBackLimit(lookBack > capacity ? capacity : lookBack);
-                int lanes = randomise ? ran.nextInt(maxLane - minLanes + 1) + minLanes : maxLane;
-                link.setLanes(lanes);
-
-                link.setkMin(0);
-                link.setkMax(5);
-                link.setvMin(1);
-                link.setvFree(5);
-
-                linkMap.put(id, link);
-            }
-        }
-    }
-
-    public void handleIntersections(Link link, double time) {
+    private void handleIntersections(Link link, double time) {
         if (link.getQueue().size() == 0)
             return;
         if (link.getServers().size() == 0)
@@ -163,7 +130,7 @@ public class Simulate {
         }
     }
 
-    public boolean processPocketDelay(Server server, Link link, double time) {
+    private boolean processPocketDelay(Server server, Link link, double time) {
         double pocketDelay = server.getPocketDelayedUntil();
         if (pocketDelay > 0) {
             server.setPocketDelayedUntil(pocketDelay - ONE_STEP);
@@ -181,7 +148,7 @@ public class Simulate {
         }
     }
 
-    public boolean calculateDelay(Server server, double time) {
+    private boolean calculateDelay(Server server, double time) {
         boolean isFree = server.getOutgoing().isFree();
         int cap = server.getOutgoing().getQueue().getCapacity();
         if (!isFree) {
@@ -194,7 +161,7 @@ public class Simulate {
         return true;
     }
 
-    public void processVehicle(Vehicle ve, Link current, Server server, double time) {
+    private void processVehicle(Vehicle ve, Link current, Server server, double time) {
         if (ve.isOnLastLink()) {
             int size = ve.getRoute().size();
             ve.getRoute().get(size - 1).getExitPoint().received(ve, time);
@@ -204,7 +171,7 @@ public class Simulate {
         current.getQueue().remove(ve);
     }
 
-    public void processOutgoingVehicles(Link current, Server server, double time) {
+    private void processOutgoingVehicles(Link current, Server server, double time) {
         int lookback = current.getLookBackLimit();
         List<Vehicle> queued = QUtil.queuedVehicles(current.getQueue(), time);
         int freeSpaces = server.getOutgoing().getQueue().getCapacity() - server.getOutgoing().getQueue().size();
@@ -219,7 +186,7 @@ public class Simulate {
         }
     }
 
-    public void processShockwave(List<Vehicle> vehicles, Link current, double time, Link outgoing) {
+    private void processShockwave(List<Vehicle> vehicles, Link current, double time, Link outgoing) {
         if (current.getQueue().size() == 0)
             return;
         double shockSpeed = 2.0;
@@ -238,23 +205,7 @@ public class Simulate {
         }
     }
 
-    public static boolean pushNewVehicle(Link link, double time, List<Link> route) {
-        if (!link.isFree())
-            return false;
-
-        double speed = link.speedDensity(time);
-        double _eet = time + (link.getLength() / speed);
-
-        Vehicle vehicle = new Vehicle(++vehicleCounter);
-        vehicle.setRoute(route);
-        vehicle.setLength(4.0);
-        vehicle.setEarliestExitTime(_eet);
-        vehicle.updateRoute();
-        link.getQueue().push(vehicle);
-        return true;
-    }
-
-    public static double shockwaveSpeed(double Q1, double Q2, double K1, double K2) {
+    private static double shockwaveSpeed(double Q1, double Q2, double K1, double K2) {
         double flow = Q1 + Q2;
         double density = K1 + K2;
         double diff = flow / density;
@@ -281,14 +232,6 @@ public class Simulate {
                     grid.add(next);
                 }
             }
-        }
-    }
-
-    public static void main(String[] args) {
-        Simulate simulate = new Simulate();
-        List<Statistics> stats = new ArrayList<>();
-        for (int i = 0; i < 50; i++) {
-            stats.add(simulate.run());
         }
     }
 

@@ -19,8 +19,7 @@ public class Grid {
     private LinkedHashMap<Integer, Link> linkMap;
     private static Random ran = new Random();
     private int averageConnectivity;
-    private int maxCarLength = 4;
-
+    private int maxCarLength = 6;
 
     public Grid(double maxLat, double minLat, double maxLon, double minLon){
         linkMap = new LinkedHashMap<>();
@@ -191,6 +190,44 @@ public class Grid {
             }
         }
         Map.getInstance().getMap().setMapPolygonList(polys);
+    }
+
+    private void generateArtificalLinks(Node[] nodes, List<Integer[]> nodePairs, HashMap<Integer, Link> linkMap) {
+        int roadLengthMax = 1000;
+        int roadLengthMin = 100;
+        int minLookBack = 1;
+        int maxLookBack = 10;
+        int minLanes = 1;
+        int maxLane = 2;
+        boolean randomise = false;
+
+        for (int i = 0; i < nodePairs.size(); i++) {
+            for (int j = 0; j < 2; j++) {
+                int length = randomise ? ran.nextInt(roadLengthMax - roadLengthMin + 1) + roadLengthMin : roadLengthMax;
+                int capacity = length / maxCarLength;
+                if (capacity == 0)
+                    capacity = 1;
+                int id = (i * 2) + j;
+
+                Integer[] pair = nodePairs.get(i);
+                Node start = nodes[pair[j == 0 ? 0 : 1] - 1];
+                Node end = nodes[pair[j == 0 ? 1 : 0] - 1];
+
+                Link link = new Link(id, capacity, start, end);
+                link.setLength(length);
+                int lookBack = randomise ? ran.nextInt(maxLookBack - minLookBack + 1) + minLookBack : maxLookBack;
+                link.setLookBackLimit(lookBack > capacity ? capacity : lookBack);
+                int lanes = randomise ? ran.nextInt(maxLane - minLanes + 1) + minLanes : maxLane;
+                link.setLanes(lanes);
+
+                link.setkMin(0);
+                link.setkMax(5);
+                link.setvMin(1);
+                link.setvFree(5);
+
+                linkMap.put(id, link);
+            }
+        }
     }
 
 

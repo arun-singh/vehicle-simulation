@@ -150,7 +150,7 @@ public class Statistics {
         return box;
     }
 
-    public static VBox vehiclesRemaining(List<List<Statistics>> results, String xLabel, String yLabel){
+    public static VBox drawVehiclesRemaining(List<List<Statistics>> results, String xLabel, String yLabel){
         LineChart chart = createChart(xLabel, yLabel);
         VBox box = new VBox();
         box.getChildren().add(chart);
@@ -166,7 +166,7 @@ public class Statistics {
         return box;
     }
 
-    public static LineChart<Number, Number> createChart(String xLabel, String yLabel){
+    private static LineChart<Number, Number> createChart(String xLabel, String yLabel){
         NumberAxis xAxis = new NumberAxis();
         NumberAxis yAxis = new NumberAxis();
         xAxis.setLabel(xLabel);
@@ -297,9 +297,4 @@ public class Statistics {
         return cars;
     }
 
-    public static void main(String[] args){
-        //Statistics.increaseCars(100, 10100, 1000, 10);
-        //double a = Math.log(1.1);
-       // System.out.println(a);
-    }
 }
