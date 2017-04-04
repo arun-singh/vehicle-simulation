@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class Map extends GridPane {
 
     private Grid grid;
-    private JMapViewerExtension map = new JMapViewerExtension();
+    private JMapViewer map = new JMapViewer();
     private List<MapMarker[]> markerPairs = new ArrayList<>();
     private final int ZOOM_LEVEL = 50;
     private static Map ourInstance = new Map();
@@ -216,7 +216,7 @@ public class Map extends GridPane {
     }
 
 
-    public JMapViewerExtension getMap() {
+    public JMapViewer getMap() {
         return map;
     }
 
