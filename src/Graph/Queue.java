@@ -1,10 +1,5 @@
 package Graph;
 
-import GUI.LinkController;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 
@@ -16,7 +11,6 @@ public class Queue extends PriorityQueue<Vehicle> implements QueueTemplate {
     private int capacity;
     private double runningProportion = 0.5;
     private Link link;
-    LinkController controller;
 
     public Queue(){}
     public Queue(int capacity, Link link){
@@ -25,11 +19,6 @@ public class Queue extends PriorityQueue<Vehicle> implements QueueTemplate {
     }
     public Queue(int capacity){
         this.capacity = capacity;
-    }
-    public Queue(int capacity, Link link, LinkController controller) {
-        this.capacity = capacity;
-        this.link = link;
-        this.controller = controller;
     }
 
     @Override
@@ -94,11 +83,5 @@ public class Queue extends PriorityQueue<Vehicle> implements QueueTemplate {
     }
     public Link getLink() {
         return link;
-    }
-    public LinkController getController() {
-        return controller;
-    }
-    public void setController(LinkController controller) {
-        this.controller = controller;
     }
 }
