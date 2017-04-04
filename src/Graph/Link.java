@@ -27,7 +27,7 @@ public class Link{
     private int id;
     private int delay = 0;
     private List<Link> adjacencyList;
-    private InputQueue inputQueue = new InputQueue(this);
+    private EntryPoint entryPoint = new EntryPoint(this);
     private OutputQueue outputQueue = new OutputQueue(this);
     private boolean accessable;
     private int connectivity;
@@ -75,7 +75,6 @@ public class Link{
         queue.runningProportion(time, carCount);
         double runningLength = getLength() - (queue.queueLength(time)/getLanes()); //queue.runningLength(time);
         double density = runningLength != 0.0 ? ((double)(carCount)) / (runningLength * getLanes()) : kMax;
-        System.out.println(density);
         return density;
     }
 
@@ -196,8 +195,8 @@ public class Link{
         this.adjacencyList = adjacencyList;
     }
 
-    public InputQueue getInputQueue() {
-        return inputQueue;
+    public EntryPoint getEntryPoint() {
+        return entryPoint;
     }
 
     public OutputQueue getOutputQueue() {

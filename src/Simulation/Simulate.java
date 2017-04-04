@@ -1,11 +1,8 @@
 package Simulation;
 
-import GUI.*;
 import Graph.*;
 import Graph.Queue;
 import Statistics.Statistics;
-import javafx.concurrent.ScheduledService;
-import javafx.concurrent.Task;
 
 import java.util.*;
 import java.util.Map;
@@ -72,8 +69,8 @@ public class Simulate {
             }
 
             // Push waiting vehicles
-            List<InputQueue> waiting = QUtil.getWaitingVehicles(grid.getLinkMap());
-            for (InputQueue queue : waiting)
+            List<EntryPoint> waiting = QUtil.getWaitingVehicles(grid.getLinkMap());
+            for (EntryPoint queue : waiting)
                 queue.pushWaiting(step);
 
             vehiclesLeft = totalVehicles - Statistics.totalVehiclesOutput(grid.getLinkMap());
@@ -113,7 +110,7 @@ public class Simulate {
         }
 
         for (int i = 0; i < totalVehicles; i++) {
-            vehicles[i].getRoute().get(0).getInputQueue().push(vehicles[i], 0.0);
+            vehicles[i].getRoute().get(0).getEntryPoint().push(vehicles[i], 0.0);
         }
         return vehicles;
     }
@@ -246,7 +243,6 @@ public class Simulate {
             return false;
 
         double speed = link.speedDensity(time);
-        System.out.println(speed);
         double _eet = time + (link.getLength() / speed);
 
         Vehicle vehicle = new Vehicle(++vehicleCounter);
