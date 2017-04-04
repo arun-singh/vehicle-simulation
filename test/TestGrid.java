@@ -94,7 +94,7 @@ public class TestGrid {
         }
 
         for(int i = 0; i<totalVehicles;i++){
-            vehicles[i].getRoute().get(0).getInputQueue().push(vehicles[i], 0.0);
+            vehicles[i].getRoute().get(0).getEntryPoint().push(vehicles[i], 0.0);
         }
 
         //linkMap.entrySet().stream().forEach(link->link.getValue().getServers().forEach(server->server.setPocketDelayedUntil(5)));
@@ -115,13 +115,13 @@ public class TestGrid {
             }
 
             // Push waiting vehicles
-            List<InputQueue> waiting = linkMap.entrySet().stream()
-                                                        .filter(l->l.getValue().getInputQueue().getWaiting().size()>0)
+            List<EntryPoint> waiting = linkMap.entrySet().stream()
+                                                        .filter(l->l.getValue().getEntryPoint().getWaiting().size()>0)
                                                         .map(Map.Entry::getValue)
-                                                        .map(l->l.getInputQueue())
+                                                        .map(l->l.getEntryPoint())
                                                         .collect(Collectors.toList());
 
-            for(InputQueue queue: waiting){
+            for(EntryPoint queue: waiting){
                 queue.pushWaiting(step);
             }
 

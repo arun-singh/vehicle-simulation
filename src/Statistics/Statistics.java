@@ -3,14 +3,11 @@ package Statistics;
 import Graph.Link;
 import Graph.Vehicle;
 import Simulation.Simulate;
-import com.sun.org.glassfish.external.statistics.Statistic;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -188,7 +185,7 @@ public class Statistics {
 
     public static int totalVehiclesInput(HashMap<Integer, Link> linkMap){
         return linkMap.entrySet().stream()
-                .mapToInt(l->l.getValue().getInputQueue().getVehiclesPushed())
+                .mapToInt(l->l.getValue().getEntryPoint().getVehiclesPushed())
                 .sum();
     }
 

@@ -62,11 +62,11 @@ public class QUtil {
                 .collect(Collectors.toList());
     }
 
-    public static List<InputQueue> getWaitingVehicles(HashMap<Integer, Link> linkMap){
+    public static List<EntryPoint> getWaitingVehicles(HashMap<Integer, Link> linkMap){
         return linkMap.entrySet().stream()
-                .filter(l->l.getValue().getInputQueue().getWaiting().size()>0)
+                .filter(l->l.getValue().getEntryPoint().getWaiting().size()>0)
                 .map(Map.Entry::getValue)
-                .map(l->l.getInputQueue())
+                .map(l->l.getEntryPoint())
                 .collect(Collectors.toList());
     }
 

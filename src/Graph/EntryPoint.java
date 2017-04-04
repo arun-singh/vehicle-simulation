@@ -6,11 +6,11 @@ import java.util.List;
 /**
  * Created by Arun on 17/01/2017.
  */
-public class InputQueue{
+public class EntryPoint {
     private Link link;
     private int vehiclesPushed = 0;
     private List<Vehicle> waiting = new ArrayList<>();
-    public InputQueue(Link link){
+    public EntryPoint(Link link){
         this.link = link;
     }
 

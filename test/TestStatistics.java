@@ -32,7 +32,7 @@ public class TestStatistics {
         LinkedHashMap<Integer, Link> linkMap = new LinkedHashMap<>();
         for(int i = 0; i<10000;i++){
             Link link = new Link(i, 10);
-            link.getInputQueue().push(new Vehicle(i), i);
+            link.getEntryPoint().push(new Vehicle(i), i);
             linkMap.put(i,link);
         }
 
