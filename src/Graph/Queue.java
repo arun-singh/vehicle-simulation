@@ -90,7 +90,7 @@ public class Queue extends PriorityQueue<Vehicle> implements QueueTemplate {
 
     public void setRunningProportion(double runningProportion) {
         this.runningProportion = runningProportion;
-        //controller.onChange(link, runningProportion);
+        ///controller.onChange(link, runningProportion);
     }
     public Link getLink() {
         return link;
