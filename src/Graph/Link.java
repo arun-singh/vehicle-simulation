@@ -28,7 +28,7 @@ public class Link{
     private int delay = 0;
     private List<Link> adjacencyList;
     private EntryPoint entryPoint = new EntryPoint(this);
-    private OutputQueue outputQueue = new OutputQueue(this);
+    private ExitPoint outputQueue = new ExitPoint(this);
     private boolean accessable;
     private int connectivity;
     private List<Coordinate> coords = new ArrayList<>();
@@ -199,7 +199,7 @@ public class Link{
         return entryPoint;
     }
 
-    public OutputQueue getOutputQueue() {
+    public ExitPoint getOutputQueue() {
         return outputQueue;
     }
 

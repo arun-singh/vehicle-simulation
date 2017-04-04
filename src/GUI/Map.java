@@ -1,26 +1,19 @@
 package GUI;
 
 import Graph.*;
-import javafx.concurrent.ScheduledService;
-import javafx.concurrent.Task;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.layout.GridPane;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
-import org.openstreetmap.gui.jmapviewer.DefaultMapController;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.MapMarkerDot;
-import org.openstreetmap.gui.jmapviewer.interfaces.ICoordinate;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapPolygon;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
-import java.util.Timer;
 import java.util.stream.Collectors;
 
 /**
@@ -37,8 +30,8 @@ public class Map extends GridPane {
 
     public Map() {
         super();
-        map.setPreferredSize(new Dimension(Main.WIDTH, Main.HEIGHT));
-        map.setSize(Main.WIDTH, Main.HEIGHT);
+        map.setPreferredSize(new Dimension(Display.WIDTH, Display.HEIGHT));
+        map.setSize(Display.WIDTH, Display.HEIGHT);
         map.setMapPolygonsVisible(true);
         map.setVisible(true);
         createMap();

@@ -1,15 +1,10 @@
 package GUI;
 
 import Graph.Grid;
-import Graph.Node;
 import Simulation.Simulate;
 import Statistics.Statistics;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.concurrent.ScheduledService;
-import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -26,7 +21,7 @@ import java.util.List;
 /**
  * Created by Arun on 17/01/2017.
  */
-public class Main extends Application{
+public class Display extends Application{
 
     static final int WIDTH = 1000;
     static final int HEIGHT = 1000;
@@ -40,11 +35,11 @@ public class Main extends Application{
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Main.primaryStage = primaryStage;
-        Main.primaryStage.setWidth(WIDTH);
-        Main.primaryStage.setHeight(HEIGHT);
+        Display.primaryStage = primaryStage;
+        Display.primaryStage.setWidth(WIDTH);
+        Display.primaryStage.setHeight(HEIGHT);
 
-        Main.recordBox = new CheckBox();
+        Display.recordBox = new CheckBox();
 
         //TODO: Get box coords
         GridPane gp = new GridPane();
@@ -63,8 +58,8 @@ public class Main extends Application{
         gp.add(coordPane, 0, 2);
 
         Scene scene = new Scene(gp);
-        Main.primaryStage.setScene(scene);
-        Main.primaryStage.show();
+        Display.primaryStage.setScene(scene);
+        Display.primaryStage.show();
     }
 
     public void ex(javafx.event.ActionEvent event){

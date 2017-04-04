@@ -22,7 +22,7 @@ public class CoordPane extends GridPane {
 
     public CoordPane(){
         super();
-        setWidth(Main.WIDTH);
+        setWidth(Display.WIDTH);
 
         HBox maxLat = new HBox(1);
         maxLat.getChildren().add(0, _maxLatLabel);

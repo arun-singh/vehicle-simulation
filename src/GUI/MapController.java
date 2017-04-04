@@ -18,8 +18,6 @@ import Graph.Link;
 import Graph.MapUtil;
 import Graph.Node;
 import org.openstreetmap.gui.jmapviewer.*;
-import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
-import org.openstreetmap.gui.jmapviewer.interfaces.MapRectangle;
 
 public class MapController extends JMapController implements MouseListener, MouseMotionListener, MouseWheelListener {
     private static final int MOUSE_BUTTONS_MASK = 7168;
@@ -41,7 +39,7 @@ public class MapController extends JMapController implements MouseListener, Mous
         if (this.movementEnabled && this.isMoving) {
             if ((e.getModifiersEx() & 7168) == this.movementMouseButtonMask || isPlatformOsx() && e.getModifiersEx() == 1152) {
                 Point p = e.getPoint();
-                if (this.lastDragPoint != null && !Main.recordBox.isSelected()) {
+                if (this.lastDragPoint != null && !Display.recordBox.isSelected()) {
                     int diffx = this.lastDragPoint.x - p.x;
                     int diffy = this.lastDragPoint.y - p.y;
                     this.map.moveMap(diffx, diffy);
@@ -117,7 +115,7 @@ public class MapController extends JMapController implements MouseListener, Mous
 
     public void mouseReleased(MouseEvent e) {
         if(e.getButton() == this.movementMouseButton || isPlatformOsx() && e.getButton() == 1) {
-            if(Main.recordBox.isSelected()){
+            if(Display.recordBox.isSelected()){
                 calculateBox(origin, new Point(e.getX(), e.getY()));
                 origin = null;
             }
@@ -181,7 +179,7 @@ public class MapController extends JMapController implements MouseListener, Mous
         CoordPane._minLatText.setText(MapUtil.minLat(bottomLeft, bottomRight, topLeft, topRight));
         CoordPane._minLonText.setText(MapUtil.minLon(bottomLeft, bottomRight, topLeft, topRight));
 
-        Main.recordBox.setSelected(false);
+        Display.recordBox.setSelected(false);
     }
 
     public void mouseWheelMoved(MouseWheelEvent e) {

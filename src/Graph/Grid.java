@@ -1,23 +1,15 @@
 package Graph;
 
 import Database.Query_V3;
-import GUI.Main;
 import GUI.Map;
-import GUI.MapPolyLine;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
-import org.openstreetmap.gui.jmapviewer.MapMarkerDot;
-import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapPolygon;
-import org.postgresql.geometric.PGline;
-import org.postgresql.geometric.PGpolygon;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Created by Arun on 22/01/2017.
