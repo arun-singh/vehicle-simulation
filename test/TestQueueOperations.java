@@ -203,21 +203,6 @@ public class TestQueueOperations {
         link.setkMax(5);
         link.setvMin(1);
         link.setvFree(5);
-
-        double time = 10;
-        double runningLength = queue.runningLength(time);
-        double runningLength2 = link.getLength() - (queue.queueLength(time)/link.getLanes());
-        System.out.println(runningLength + "," + runningLength2);
-        queue.push(v1);
-
-
-
-        queue.push(v2);
-        queue.push(v3);
-        queue.push(v4);
-
-
-
     }
 
     @Test
@@ -406,6 +391,9 @@ public class TestQueueOperations {
         v3.setEarliestExitTime(4);
 
         queue.push(v1);
+        List<Vehicle> queuedOne = QUtil.queuedVehicles(queue, 4);
+        List<Vehicle> oneConform = QUtil.getServerComforedVehicles(queuedOne, next, queuedOne.size());
+
         queue.push(v2);
         queue.push(v3);
         queue.push(v4);
