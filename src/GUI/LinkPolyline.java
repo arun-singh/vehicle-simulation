@@ -40,7 +40,7 @@ public class LinkPolyline extends MapPolygonImpl{
     @Override
     public void paint(Graphics g, List<Point> wayPoints) {
         Graphics2D g2d = (Graphics2D) g.create();
-        g2d.setColor(link.getQueue().size() > 0 ? (link.isFree() ? Color.ORANGE : Color.red) : Color.green);
+        g2d.setColor(link.getQueue().size() > 0 ? Color.red : Color.green);
         g2d.setStroke(new BasicStroke(2));
         Path2D path = buildPath(wayPoints);
         g2d.draw(path);

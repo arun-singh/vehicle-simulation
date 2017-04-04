@@ -89,7 +89,7 @@ public class MapUtil {
 
     public static List<Link> getInputLinks(HashMap<Integer, Link> linkMap, int averageConnectivity){
         return linkMap.entrySet().stream()
-                .filter(l->l.getValue().getServers().size()>1 && l.getValue().getConnectivity()>averageConnectivity)
+                .filter(l->l.getValue().getServers().size()>2)
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
     }
@@ -158,6 +158,10 @@ public class MapUtil {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         crowFliesLength = R * c;
         return crowFliesLength;
+    }
+
+    public static Link getLinkById(HashMap<Integer, Link> linkMap, int id){
+        return linkMap.entrySet().stream().filter(l->l.getValue().getId()==id).map(Map.Entry::getValue).collect(Collectors.toList()).get(0);
     }
 
 

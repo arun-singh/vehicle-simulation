@@ -80,7 +80,7 @@ public class GH {
         hopper.importOrLoad();
 
         List<List<Link>> routes = new ArrayList<>();
-        List<Link> inputLinks = Statistics.getInputLinks(linkMap);
+        List<Link> inputLinks = MapUtil.getInputLinks(linkMap, 0);
 
         for(int i =0; i <routeTotal; i++){
             int startingIndex = ran.nextInt((inputLinks.size()-1) + 1);
@@ -140,7 +140,6 @@ public class GH {
         List<Link> route = new ArrayList<>();
         List<Coordinate> coords = new ArrayList<>();
 
-
         HashMap<Integer, Link> linkMap = GUI.Map.getInstance().getGrid().getLinkMap();
         Node chosen = start.getTarget();
         for(int i = 0; i <iList.size(); i++){
@@ -164,15 +163,15 @@ public class GH {
             chosen = newLink.getTarget();
 
             //draw new link
-            Coordinate c = new Coordinate(newLink.getSource().getLatitude(), newLink.getSource().getLongitude());
-            Coordinate c1 = new Coordinate(newLink.getTarget().getLatitude(), newLink.getTarget().getLongitude());
-            coords.add(c); coords.add(c1);
+//            Coordinate c = new Coordinate(newLink.getSource().getLatitude(), newLink.getSource().getLongitude());
+//            Coordinate c1 = new Coordinate(newLink.getTarget().getLatitude(), newLink.getTarget().getLongitude());
+//            coords.add(c); coords.add(c1);
             route.add(newLink);
         }
-        MapPolyLine line = new MapPolyLine(coords);
-        line.setBackColor(Color.BLUE);
-        line.setColor(Color.BLUE);
-        GUI.Map.getInstance().getMap().addMapPolygon(line);
+//        MapPolyLine line = new MapPolyLine(coords);
+//        line.setBackColor(Color.BLUE);
+//        line.setColor(Color.BLUE);
+//        GUI.Map.getInstance().getMap().addMapPolygon(line);
         return route;
     }
 

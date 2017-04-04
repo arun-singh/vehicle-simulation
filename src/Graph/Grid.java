@@ -14,6 +14,7 @@ import org.postgresql.geometric.PGpolygon;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -38,37 +39,40 @@ public class Grid {
     public Grid(double maxLat, double minLat, double maxLon, double minLon){
         linkMap = new LinkedHashMap<>();
         Map.getInstance().setGrid(this);
+        System.out.println("Querying database");
         ResultSet rs = Query_V3.getLinkFromBox(maxLat, minLat, maxLon, minLon, Query_V3.carFilter);
         List<Node[]> carsFilter = generateNodePairs(rs);
-
+        System.out.println("Generating links");
         generateLinks(carsFilter, linkLengths, oneway, linestring);
+        System.out.println(" Creating servers");
         Link.createServers(linkMap);
-        //Map.getInstance().drawMapMarkers(carsFilter);
+        System.out.println("Finished server creation");
+       // Map.getInstance().drawMapMarkers(carsFilter);
 
         // Number of connections
-        List<Node[]> unconnected = new ArrayList<>();
-        for(java.util.Map.Entry<Integer, Link> entry : linkMap.entrySet()){
-            int connections = MapUtil.connections(entry.getValue());
-            if(connections==0)
-                unconnected.add(new Node[]{entry.getValue().getSource(), entry.getValue().getTarget()});
-            entry.getValue().setConnectivity(connections);
-            MapUtil.cache.clear();
-        }
+//        List<Node[]> unconnected = new ArrayList<>();
+//        for(java.util.Map.Entry<Integer, Link> entry : linkMap.entrySet()){
+//            int connections = MapUtil.connections(entry.getValue());
+//            if(connections==0)
+//                unconnected.add(new Node[]{entry.getValue().getSource(), entry.getValue().getTarget()});
+//            entry.getValue().setConnectivity(connections);
+//            MapUtil.cache.clear();
+//        }
+//
+//        int totalConnections = linkMap.entrySet().stream().mapToInt(l->l.getValue().getConnectivity()).sum();
+//        int averageconnections = totalConnections/linkMap.size();
+//        setAverageConnectivity(averageconnections);
 
-        int totalConnections = linkMap.entrySet().stream().mapToInt(l->l.getValue().getConnectivity()).sum();
-        int averageconnections = totalConnections/linkMap.size();
-        setAverageConnectivity(averageconnections);
-
-        //One way
-        int oneWayCount = 0;
-        for(java.util.Map.Entry<Integer, Link> entry : linkMap.entrySet()) {
-            boolean oneWay = MapUtil.isLinkOneWay(entry.getValue(), linkMap);
-            if (oneWay) oneWayCount++;
-        }
-
-        int totalCap = linkMap.entrySet().stream()
-                .mapToInt(l->l.getValue().getQueue().getCapacity())
-                .sum();
+//        //One way
+//        int oneWayCount = 0;
+//        for(java.util.Map.Entry<Integer, Link> entry : linkMap.entrySet()) {
+//            boolean oneWay = MapUtil.isLinkOneWay(entry.getValue(), linkMap);
+//            if (oneWay) oneWayCount++;
+//        }
+//
+//        int totalCap = linkMap.entrySet().stream()
+//                .mapToInt(l->l.getValue().getQueue().getCapacity())
+//                .sum();
 
     }
 
@@ -106,6 +110,17 @@ public class Grid {
         return null;
     }
 
+
+    public List<Link> oneRouteDemo(HashMap<Integer, Link> linkMap){
+        int[] ids = new int[]{1170, 1081, 1210, 911};//911, 845, 548, 684, 428, 1143, 344, 377, 678, 398, 856, 754, 1027, 752, 405, 193, 477, 832, 265, 29};
+        //int[] ids = new int[]{218, 388, 230};
+
+        List<Link> route = new ArrayList<>();
+        for(Integer id : ids){
+            route.add(MapUtil.getLinkById(linkMap, id));
+        }
+        return route;
+    }
 
     private void generateLinks(List<Node[]> nodePairs, List<Double> lengths, List<Boolean> oneway, List<List<Coordinate>> linestring) {
         int seen = 0;
@@ -159,34 +174,60 @@ public class Grid {
         //Map.getInstance().getMap().paintImmediately(0, 0, Map.getInstance().getMap().getWidth(), Map.getInstance().getMap().getHeight());
     }
 
-    public void generateOneWayLinks(List<Node[]> nodePairs, List<Double> lengths) {
-        for (int i = 0; i < nodePairs.size(); i++) {
-            double length = lengths.get(i);
-            int capacity = (int) (Math.ceil(length / maxCarLength));
-            if (capacity == 0) capacity = 1;
-            int id = i;
+    public void generateOneWayLinks(List<Node[]> nodePairs, List<Double> lengths, List<Boolean> oneway, List<List<Coordinate>> linestring) {
+        int seen = 0;
+        List<MapPolygon> polys = new ArrayList<>();
+        for(int i = 0; i<nodePairs.size(); i++) {
+            boolean ow = oneway.get(i);
+            int rev = 1;
+            for(int j = 0 ; j < rev ; j++){
+                int id = seen;
+                seen++;
 
-            Node[] pair = nodePairs.get(i);
-            Node start = pair[0];
-            Node end = pair[1];
+                double length = lengths.get(i);
+                int capacity = (int)(Math.ceil(length/maxCarLength));
+                if(capacity==0) capacity=1;
 
-            Link link = new Link(id, capacity, start, end);
-            link.setLength(length);
-            int maxLookBack = 10;
-            int minLookBack = 1;
+                Node[] pair = nodePairs.get(i);
+                Node start = pair[j==0?0:1];
+                Node end = pair[j==0?1:0];
 
-            int lookBack = ran.nextInt(maxLookBack - minLookBack + 1) + minLookBack;
-            link.setLookBackLimit(lookBack > capacity ? capacity : lookBack);
-            int lanes = 1;//ran.nextInt(maxLane - minLanes + 1) + minLanes;
-            link.setLanes(lanes);
+                Link link = new Link(id, capacity, start, end);
+                link.setLength(length);
+                double lookBack = capacity==1 ? 1 : Math.ceil(((double)capacity)/4);
+                link.setLookBackLimit(lookBack == 0 ? 1 : (int)lookBack);
 
-            link.setkMin(0);
-            link.setkMax(5);
-            link.setvMin(1);
-            link.setvFree(5);
+                //b
+                int lanes = 1;//ran.nextInt(maxLane - minLanes + 1) + minLanes;
+                link.setLanes(lanes);
 
-            linkMap.put(id, link);
+                List<Coordinate> coords = linestring.get(i);
+                if(j==1){
+                    List<Coordinate> reversed = new ArrayList<>();
+                    for(int k = coords.size()-1; k>=0; k--){
+                        reversed.add(new Coordinate(coords.get(k).getLat(), coords.get(k).getLon()));
+                    }
+                    link.setPolyline(reversed);
+                }else{
+                    link.setPolyline(coords);
+                }
+
+                polys.add(link.getPolyline());
+                //Map.getInstance().getMap().addMapPolygon(link.getPolyline());
+
+                link.setkMin(0);
+                link.setkMax(((double)capacity)/length);
+                link.setvMin(1);
+                link.setvFree(12);
+                linkMap.put(id, link);
+            }
         }
+        Map.getInstance().getMap().setMapPolygonList(polys);
+    }
+
+
+    public List<List<Link>> generateRoutes2(List<Link> inputLinks){
+        return GH.generateRoutes(linkMap, 1);
     }
 
 
@@ -201,18 +242,23 @@ public class Grid {
         int count = 0;
         while(serverSize!=0){
             try {
-                serverIndex = serverSize == 1 ? 0 : ran.nextInt((serverSize - 1) + 1);
+                serverIndex = serverSize == 1 ? 0 : ThreadLocalRandom.current().nextInt(0, (serverSize - 1) + 1); //ran.nextInt((serverSize - 1) + 1);
             }catch (IllegalArgumentException e){
                 System.out.println("Caught");
                 System.out.println("Server in; " + serverSize);
             }
-            next = next.getServers().get(serverIndex).getOutgoing();
+            try{
+                next = next.getServers().get(serverIndex).getOutgoing();
+
+            }catch (NullPointerException e){
+                e.printStackTrace();
+            }
             if(route.contains(next))
                 break;
             route.add(next);
             serverSize = next.getServers().size();
             count++;
-            if(count==30) break;
+            if(count==20) break;
         }
         return route;
     }

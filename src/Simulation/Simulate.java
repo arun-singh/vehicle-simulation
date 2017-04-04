@@ -53,8 +53,10 @@ public class Simulate {
         LinkedHashMap<Integer, Integer> shockMap = new LinkedHashMap<>();
 
         Vehicle[] vehicles = new Vehicle[totalVehicles];
-        int pushed = 0;
+        System.out.println("Generating vehicles and routes");
         generateVehicles(vehicles, inputLinks);
+        System.out.println("Finished generating vehicles and routes");
+
 
         int step = 0;
         int vehiclesLeft = -1;
@@ -84,7 +86,7 @@ public class Simulate {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            //Statistics.diagnostics(grid.getLinkMap());
+            // Statistics.diagnostics(grid.getLinkMap());
             step++;
         }
         stats = new Statistics(vehiclesMap, shockwavesGenerated, vehicles, grid.getLinkMap(), totalVehicles, shockMap);
@@ -99,7 +101,7 @@ public class Simulate {
             Vehicle vehicle = new Vehicle(i);
             vehicle.setLength(length);
 
-            List<Link> route = Grid.generateRoute(inputLinks);
+            List<Link> route = Grid.generateRoute(inputLinks); //grid.oneRouteDemo(grid.getLinkMap());
             vehicle.setRoute(route);
 
             List<Link> list = vehicle.getRoute();

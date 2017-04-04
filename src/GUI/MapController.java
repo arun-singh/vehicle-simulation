@@ -60,20 +60,25 @@ public class MapController extends JMapController implements MouseListener, Mous
 
     public void mouseClicked(MouseEvent e) {
         Coordinate c = map.getPosition(e.getPoint());
-        System.out.println(e.getPoint().getX() + ", " + e.getPoint().getY());
-//        MapMarkerDot source = nearest(c);
-//        Node nsource = new Node(source.getLat(), source.getLon());
-//        System.out.println("-----------------------------------------------");
-//        System.out.println(source.getLat() + ", " + source.getLon());
-//
-//        List<Link> targetList = Map.getInstance().getGrid()
-//                .getLinkMap()
-//                .entrySet()
-//                .stream()
-//                .filter(m->m.getValue().getSource().equals(nsource))
-//                .map(l->l.getValue())
-//                .collect(Collectors.toList());
-//
+       // System.out.println(e.getPoint().getX() + ", " + e.getPoint().getY());
+        MapMarkerDot source = nearest(c);
+        Node nsource = new Node(source.getLat(), source.getLon());
+        System.out.println("-----------------------------------------------");
+        System.out.println(source.getLat() + ", " + source.getLon());
+
+        List<Link> targetList = Map.getInstance().getGrid()
+                .getLinkMap()
+                .entrySet()
+                .stream()
+                .filter(m->m.getValue().getSource().equals(nsource))
+                .map(l->l.getValue())
+                .collect(Collectors.toList());
+
+        for(Link link : targetList){
+            System.out.println(link.getId());
+
+        }
+
 //        if(targetList.size()==0)
 //            System.out.println("No Targets");
 //        else{

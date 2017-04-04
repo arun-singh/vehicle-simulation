@@ -47,17 +47,6 @@ public class Main extends Application{
         Main.recordBox = new CheckBox();
 
         //TODO: Get box coords
-        java.util.List<double[]> latlon = new ArrayList<>();
-        latlon.add(new double[]{52.4432354, -1.9366254});
-        latlon.add(new double[]{52.437009, -1.9293171});
-        latlon.add(new double[]{52.4469844, -1.9277054});
-        latlon.add(new double[]{52.4407134, -1.9255364});
-
-        //52.422039, -1.813235
-        //52.421541, -1.776757
-        //52.411569, -1.774139
-        //52.404448, -1.813321
-
         GridPane gp = new GridPane();
 
         Button control = new Button("Start");
@@ -72,16 +61,6 @@ public class Main extends Application{
         gp.add(control, 0, 1);
         gp.add(recordBox, 1, 1);
         gp.add(coordPane, 0, 2);
-
-//        latlon.add(new double[]{52.422039, -1.813235});
-//        latlon.add(new double[]{52.421541, -1.776757});
-//        latlon.add(new double[]{52.411569, -1.774139});
-//        latlon.add(new double[]{52.404448, -1.813321});
-        maxLat = Grid.maxLat(latlon);
-        minLat = Grid.minLat(latlon);
-        minLon = Grid.minLon(latlon);
-        maxLon = Grid.maxLon(latlon);
-
 
         Scene scene = new Scene(gp);
         Main.primaryStage.setScene(scene);
@@ -98,7 +77,7 @@ public class Main extends Application{
         double midLat = (minLat + maxLat) / 2;
         double midLon = (minLon + maxLon) / 2;
 
-        map.getMap().setDisplayPosition(new Coordinate(midLat, midLon), 15);
+        map.getMap().setDisplayPosition(new Coordinate(midLat, midLon), 14);
 
         TimerTask task = new TimerTask() {
             @Override
@@ -121,7 +100,7 @@ public class Main extends Application{
                     Simulate simulate = new Simulate(grid);
                     simulate.run();
                 }else {
-                    List<List<Statistics>> stats = Statistics.increaseCars(100, 1500, 100, 10,
+                    List<List<Statistics>> stats = Statistics.increaseCars(100, 1600, 100, 5,
                             new double[]{maxLat, minLat, maxLon, minLon});
 
                     Platform.runLater(() -> {

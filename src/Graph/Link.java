@@ -75,6 +75,7 @@ public class Link{
         queue.runningProportion(time, carCount);
         double runningLength = getLength() - (queue.queueLength(time)/getLanes()); //queue.runningLength(time);
         double density = runningLength != 0.0 ? ((double)(carCount)) / (runningLength * getLanes()) : kMax;
+        System.out.println(density);
         return density;
     }
 
@@ -108,12 +109,14 @@ public class Link{
             Node start = entry.getValue().getSource();
 
             List<Link> adjacent = linkMap.entrySet().stream()
+                    .parallel()
                     .filter(l -> l.getValue().getSource().equals(end) && !(l.getValue().getTarget().equals(start)))
                     .map(java.util.Map.Entry::getValue)
                     .collect(Collectors.toList());
             entry.getValue().setAdjacencyList(adjacent);
 
-            adjacent.stream().forEach(l -> entry.getValue().getServers().add(
+            adjacent.stream()
+                .forEach(l -> entry.getValue().getServers().add(
                     new QueueServer(entry.getValue(), l, QueueServer.Type.NORMAL)));
         }
     }

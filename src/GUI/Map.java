@@ -66,8 +66,8 @@ public class Map extends GridPane {
     }
 
     public void update(){
-        //map.repaint();
-        map.paintImmediately(0, 0, map.getWidth(), map.getHeight());
+        map.repaint();
+        //map.paintImmediately(0, 0, map.getWidth(), map.getHeight());
     }
 
     public void drawMapMarkers(java.util.List<Node[]> coords){

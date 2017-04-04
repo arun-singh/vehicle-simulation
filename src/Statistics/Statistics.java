@@ -4,6 +4,7 @@ import Graph.Link;
 import Graph.Vehicle;
 import Simulation.Simulate;
 import com.sun.org.glassfish.external.statistics.Statistic;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -69,14 +70,34 @@ public class Statistics {
 
         LineChart chart = createChart(xLabel, yLabel);
         XYChart.Series<Number, Number> series = new XYChart.Series<>();
+
         chart.getData().add(series);
         VBox box = new VBox();
         box.getChildren().add(chart);
 
         for(List<Statistics> stat : results){
+            XYChart.Series<Number, Number> error = new XYChart.Series<>();
+            chart.getData().add(error);
+
             int cars = stat.get(0).getCars();
             double averageFinish = stat.stream().mapToDouble(s->s.getFinishStep()).sum() / stat.size();
+
+            double temp = 0;
+            for(Statistics s : stat){
+                temp+= (s.getFinishStep()-averageFinish) * (s.getFinishStep()-averageFinish);
+            }
+            double var = temp/stat.size();
+            double stdv = Math.sqrt(var);
+
             series.getData().add(new XYChart.Data<>(cars, averageFinish));
+            error.getData().add(new XYChart.Data<>(cars, averageFinish+stdv));
+            error.getData().add(new XYChart.Data<>(cars, averageFinish-stdv));
+
+            Node line = series.getNode().lookup(".chart-series-line");
+            line.setStyle("-fx-stroke: " + "blue");
+
+            Node lineTwo = error.getNode().lookup(".chart-series-line");
+            lineTwo.setStyle("-fx-stroke: " + "red;" + " -fx-stroke-dash-array: " +  "0.1 5.0;");
         }
 
         return box;
@@ -90,9 +111,27 @@ public class Statistics {
         box.getChildren().add(chart);
 
         for(List<Statistics> stat : results){
+            XYChart.Series<Number, Number> error = new XYChart.Series<>();
+            chart.getData().add(error);
             int cars = stat.get(0).getCars();
             double averageFinish = stat.stream().mapToDouble(s->s.getShockwavesGenerated()).sum() / stat.size();
+
+            double temp = 0;
+            for(Statistics s : stat){
+                temp+= (s.getFinishStep()-averageFinish) * (s.getFinishStep()-averageFinish);
+            }
+            double var = temp/stat.size();
+            double stdv = Math.sqrt(var);
+
             series.getData().add(new XYChart.Data<>(cars, averageFinish));
+            error.getData().add(new XYChart.Data<>(cars, averageFinish+stdv));
+            error.getData().add(new XYChart.Data<>(cars, averageFinish-stdv));
+
+            Node line = series.getNode().lookup(".chart-series-line");
+            line.setStyle("-fx-stroke: " + "blue");
+
+            Node lineTwo = error.getNode().lookup(".chart-series-line");
+            lineTwo.setStyle("-fx-stroke: " + "red;" + " -fx-stroke-dash-array: " +  "0.1 5.0;");
         }
         return box;
     }
