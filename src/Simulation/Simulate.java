@@ -58,7 +58,7 @@ public class Simulate {
 //                entry.getValue().setRunningDensity(entry.getValue().runningDensity(step));
 //            }
 
-            /// For all links process turns
+            //// For all links process turns
             for (Map.Entry<Integer, Link> entry : grid.getLinkMap().entrySet()) {
                 handleIntersections(entry.getValue(), step);
             }
