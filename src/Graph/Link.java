@@ -55,8 +55,7 @@ public class Link{
 
     public double speedDensity(double time){
         double k = runningDensity(time);
-        //System.out.println(k);
-        if(k < kMin)
+        if(k <= kMin)
             return vFree;
         if(k > kMax)
             return vMin;
@@ -72,9 +71,8 @@ public class Link{
 
     public double runningDensity(double time){
         int carCount = queue.runningSectionCars(time);
-        queue.runningProportion(time, carCount);
-        double runningLength = getLength() - (queue.queueLength(time)/getLanes()); //queue.runningLength(time);
-        double density = runningLength != 0.0 ? ((double)(carCount)) / (runningLength * getLanes()) : kMax;
+        double runningLength = queue.size() != 0 ? getLength() - (queue.queueLength(time)/getLanes()) : 0;
+        double density = runningLength != 0.0 ? ((double)(carCount)) / (runningLength * getLanes()) : 0;
         return density;
     }
 
