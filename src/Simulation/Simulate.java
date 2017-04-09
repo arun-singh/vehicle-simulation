@@ -1,5 +1,6 @@
 package Simulation;
 
+import GUI.Display;
 import Graph.*;
 import Graph.Queue;
 import Statistics.Statistics;
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
 public class Simulate {
 
     private final int ONE_STEP = 1;
-    private static int vehicleCounter = 0;
+    public static boolean running = false;
     private int shockwavesGenerated = 0;
     private Grid grid;
     private Random ran = new Random();
@@ -39,6 +40,7 @@ public class Simulate {
     }
 
     public Statistics run() {
+        running = true;
         shockwavesGenerated = 0;
         List<Link> inputLinks = MapUtil.getInputLinks(grid.getLinkMap(), grid.getAverageConnectivity());
         LinkedHashMap<Integer, Integer> vehiclesMap = new LinkedHashMap<>();
@@ -49,15 +51,9 @@ public class Simulate {
         generateVehicles(vehicles, inputLinks);
         System.out.println("Finished generating vehicles and routes");
 
-
         int step = 0;
         int vehiclesLeft = -1;
         while (vehiclesLeft != 0) {
-            /// For all links calculate density
-//            for (Map.Entry<Integer, Link> entry : grid.getLinkMap().entrySet()) {
-//                entry.getValue().setRunningDensity(entry.getValue().runningDensity(step));
-//            }
-
             //// For all links process turns
             for (Map.Entry<Integer, Link> entry : grid.getLinkMap().entrySet()) {
                 handleIntersections(entry.getValue(), step);
@@ -74,16 +70,17 @@ public class Simulate {
             vehiclesMap.put(step, vehiclesLeft);
             shockMap.put(step, shockwavesGenerated);
             try {
-                Thread.sleep(150);
+                Thread.sleep(Display.stats.isSelected() ? 0 : 150);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            // Statistics.diagnostics(grid.getLinkMap());
+            //isGridLocked();
+           // Statistics.diagnostics(grid.getLinkMap());
             step++;
         }
         stats = new Statistics(vehiclesMap, shockwavesGenerated, vehicles, grid.getLinkMap(), totalVehicles, shockMap);
         System.out.println(shockwavesGenerated);
-        //GUI.Map.getInstance().getMap().removeAllMapPolygons();
+        running = false;
         return stats;
     }
 
@@ -110,36 +107,38 @@ public class Simulate {
         return vehicles;
     }
 
-
-
-    private void handleIntersections(Link link, double time) {
+    public void handleIntersections(Link link, double time) {
         if (link.getQueue().size() == 0)
             return;
         if (link.getServers().size() == 0)
             return;
 
         for (Server server : link.getServers()) {
-            boolean delayProcessed = processPocketDelay(server, link, time);
-            if (delayProcessed) continue;
+            boolean delayed = processPocketDelay(server, link, time);
+            if (delayed) continue;
 
-            boolean isOutgoingBlocked = calculateDelay(server, time);
-            if (!isOutgoingBlocked) continue;
+            boolean outgoingBlocked = calculateDelay(server, time);
+            if (outgoingBlocked) continue;
 
             // Outgoing link free
             processOutgoingVehicles(link, server, time);
         }
     }
 
-    private boolean processPocketDelay(Server server, Link link, double time) {
+    public boolean processPocketDelay(Server server, Link link, double time) {
         double pocketDelay = server.getPocketDelayedUntil();
         if (pocketDelay > 0) {
             server.setPocketDelayedUntil(pocketDelay - ONE_STEP);
-            if (server.getPocketDelayedUntil() <= 0.0) { // Become unblocked so shock-wave formed
+            if (server.getPocketDelayedUntil() <= 0.0) { // Become unblocked so shock-wave reached queue front
                 int lookback = link.getLookBackLimit();
                 List<Vehicle> queued = QUtil.queuedVehicles(link.getQueue(), time);
                 List<Vehicle> forOutgoing = QUtil.getServerComforedVehicles(queued, server.getOutgoing(), lookback);
-                if (forOutgoing.size() > 0)
-                    processShockwave(forOutgoing, link, time, server.getOutgoing());
+                if (forOutgoing.size() > 0) {
+                    if (server.getOutgoing().getQueue().size() == 0)
+                        return false;
+                    else
+                        processShockwave(forOutgoing, link, time, server.getOutgoing());
+                }
                 return true;
             }
             return true;
@@ -150,18 +149,38 @@ public class Simulate {
 
     private boolean calculateDelay(Server server, double time) {
         boolean isFree = server.getOutgoing().isFree();
-        int cap = server.getOutgoing().getQueue().getCapacity();
         if (!isFree) {
+            shockwavesGenerated++;
             server.setEntriesDeniedCount(server.getEntriesDeniedCount() + 1);
-            double shockSpeed = 2.0; //TODO: Use correct densities and flows
+            List<Server> outgoingServers = server.getOutgoing().getServers();
+            double shockSpeed = 2.0; //default
+            if(outgoingServers.size()>1){ //May need to average shock speeds
+                Set<Link> relevantLinks = server.getOutgoing().getQueue().stream()
+                        .filter(v->v.getNextLink().getQueue().size()>0)
+                        .map(v->v.getNextLink())
+                        .collect(Collectors.toSet());
+
+                if(relevantLinks.size()!=0) {
+                    // Sum all shock speeds
+                    double shockSpeedSum = relevantLinks.stream()
+                            .mapToDouble(l -> shockwaveSpeed(server.getOutgoing(), l, time))
+                            .sum();
+                    shockSpeed = shockSpeedSum / relevantLinks.size(); //average
+                }
+            }else{
+                // Only one link to compare
+                if(outgoingServers.size() > 0 && outgoingServers.get(0).getOutgoing().getQueue().size()>0)
+                    shockSpeed = shockwaveSpeed(server.getOutgoing(), outgoingServers.get(0).getOutgoing(), time);
+            }
+            //System.out.println(shockSpeed);
             double delayedUntil = server.getOutgoing().getLength() / shockSpeed;
             server.setPocketDelayedUntil(delayedUntil);
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
-    private void processVehicle(Vehicle ve, Link current, Server server, double time) {
+    public void processVehicle(Vehicle ve, Link current, Server server, double time) {
         if (ve.isOnLastLink()) {
             int size = ve.getRoute().size();
             ve.getRoute().get(size - 1).getExitPoint().received(ve, time);
@@ -186,14 +205,13 @@ public class Simulate {
         }
     }
 
-    private void processShockwave(List<Vehicle> vehicles, Link current, double time, Link outgoing) {
+    public void processShockwave(List<Vehicle> vehicles, Link current, double time, Link outgoing) {
         if (current.getQueue().size() == 0)
             return;
-        double shockSpeed = 2.0;
-        double speedAtCap = 1.0;
+        double shockSpeed = shockwaveSpeed(current, outgoing, time);
+        double speedAtCap = current.speedDensity2(current.getkMax());
 
-        shockwavesGenerated++;
-        double latestExitTime = Double.MAX_VALUE;
+        double latestExitTime = Integer.MAX_VALUE;
         Queue beforeUpdates = QUtil.copy(current.getQueue());
         for (Vehicle ve : vehicles) {
             if (ve.getEarliestExitTime() > latestExitTime) break;
@@ -205,11 +223,13 @@ public class Simulate {
         }
     }
 
-    private static double shockwaveSpeed(double Q1, double Q2, double K1, double K2) {
-        double flow = Q1 + Q2;
-        double density = K1 + K2;
-        double diff = flow / density;
-        return diff;
+    public double shockwaveSpeed(Link upstream, Link downstream, double time){
+        double uK = upstream.getkMax();
+        double dK = ( ((double)downstream.getQueue().size()) /( downstream.getLanes()*downstream.getLength()));
+        double dV = downstream.speedDensity(time);
+        double dQ = dK * dV;
+        double ss =  dQ / uK - dK;
+        return ss;
     }
 
     public void isGridLocked(){
@@ -223,8 +243,10 @@ public class Simulate {
 
             Link next = link.getQueue().getHead().getNextLink();
             grid.add(next);
-            while(!next.isFree()){
-                next = next.getQueue().getHead().getNextLink();
+            while(next!=null){
+                Queue q = next.getQueue();
+                Vehicle v = q.getHead();
+                next = v.getNextLink();
                 if(grid.get(0).equals(next)){
                     System.out.println("Gridlocked");
                     return;
