@@ -49,33 +49,33 @@ public class MapController extends JMapController implements MouseListener, Mous
         }
     }
 
-//    public void mouseClicked(MouseEvent e) {
-//        if(this.doubleClickZoomEnabled && e.getClickCount() == 2 && e.getButton() == 1) {
-//            this.map.zoomIn(e.getPoint());
-//        }
-//
-//    }
-
     public void mouseClicked(MouseEvent e) {
-        Coordinate c = map.getPosition(e.getPoint());
-       // System.out.println(e.getPoint().getX() + ", " + e.getPoint().getY());
-        MapMarkerDot source = nearest(c);
-        Node nsource = new Node(source.getLat(), source.getLon());
-        System.out.println("-----------------------------------------------");
-        System.out.println(source.getLat() + ", " + source.getLon());
-
-        List<Link> targetList = Map.getInstance().getGrid()
-                .getLinkMap()
-                .entrySet()
-                .stream()
-                .filter(m->m.getValue().getSource().equals(nsource))
-                .map(l->l.getValue())
-                .collect(Collectors.toList());
-
-        for(Link link : targetList){
-            System.out.println(link.getId());
-
+        if(this.doubleClickZoomEnabled && e.getClickCount() == 2 && e.getButton() == 1) {
+            this.map.zoomIn(e.getPoint());
         }
+
+    }
+
+  //  public void mouseClicked(MouseEvent e) {
+//        Coordinate c = map.getPosition(e.getPoint());
+//       // System.out.println(e.getPoint().getX() + ", " + e.getPoint().getY());
+//        MapMarkerDot source = nearest(c);
+//        Node nsource = new Node(source.getLat(), source.getLon());
+//        System.out.println("-----------------------------------------------");
+//        System.out.println(source.getLat() + ", " + source.getLon());
+//
+//        List<Link> targetList = Map.getInstance().getGrid()
+//                .getLinkMap()
+//                .entrySet()
+//                .stream()
+//                .filter(m->m.getValue().getSource().equals(nsource))
+//                .map(l->l.getValue())
+//                .collect(Collectors.toList());
+//
+//        for(Link link : targetList){
+//            System.out.println(link.getId());
+//
+//        }
 
 //        if(targetList.size()==0)
 //            System.out.println("No Targets");
@@ -102,7 +102,7 @@ public class MapController extends JMapController implements MouseListener, Mous
 //                }
 //            }
 //        }
-    }
+ //   }
 
     public void mousePressed(MouseEvent e) {
         if(e.getButton() == this.movementMouseButton || isPlatformOsx() && e.getModifiersEx() == 1152) {
@@ -158,28 +158,24 @@ public class MapController extends JMapController implements MouseListener, Mous
             bottomLeft = map.getPosition(new Point(endX, endY));
         }
 
-        MapMarkerDot tL = new MapMarkerDot(topLeft);
-        MapMarkerDot tR = new MapMarkerDot(topRight);
-        MapMarkerDot bL = new MapMarkerDot(bottomLeft);
-        MapMarkerDot bR = new MapMarkerDot(bottomRight);
-        map.addMapMarker(tL);
-        map.addMapMarker(tR);
-        map.addMapMarker(bL);
-        map.addMapMarker(bR);
+        boolean withinBounds = CoordPane.checkAndSetCoordinates(bottomLeft, bottomRight, topLeft, topRight);
+        if(withinBounds) {
+            MapMarkerDot tL = new MapMarkerDot(topLeft);
+            MapMarkerDot tR = new MapMarkerDot(topRight);
+            MapMarkerDot bL = new MapMarkerDot(bottomLeft);
+            MapMarkerDot bR = new MapMarkerDot(bottomRight);
+            map.addMapMarker(tL);
+            map.addMapMarker(tR);
+            map.addMapMarker(bL);
+            map.addMapMarker(bR);
 
-        MapRectangleImpl rec = new MapRectangleImpl(topLeft, bottomRight);
-        rec.setBackColor(Color.black);
-        rec.setVisible(true);
-        rec.setColor(Color.black);
-        map.addMapRectangle(rec);
-        map.paintImmediately(0, 0, map.getWidth(), map.getHeight());
-
-        CoordPane._maxLatText.setText(MapUtil.maxLat(bottomLeft, bottomRight, topLeft, topRight));
-        CoordPane._maxLonText.setText(MapUtil.maxLon(bottomLeft, bottomRight, topLeft, topRight));
-        CoordPane._minLatText.setText(MapUtil.minLat(bottomLeft, bottomRight, topLeft, topRight));
-        CoordPane._minLonText.setText(MapUtil.minLon(bottomLeft, bottomRight, topLeft, topRight));
-
-        Display.recordBox.setSelected(false);
+            MapRectangleImpl rec = new MapRectangleImpl(topLeft, bottomRight);
+            rec.setBackColor(Color.black);
+            rec.setVisible(true);
+            rec.setColor(Color.black);
+            map.addMapRectangle(rec);
+            map.paintImmediately(0, 0, map.getWidth(), map.getHeight());
+        }
     }
 
     public void mouseWheelMoved(MouseWheelEvent e) {

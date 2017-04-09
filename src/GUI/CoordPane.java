@@ -1,9 +1,16 @@
 package GUI;
 
+import Graph.MapUtil;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import org.openstreetmap.gui.jmapviewer.Coordinate;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * Created by Arun on 18/03/2017.
@@ -47,4 +54,48 @@ public class CoordPane extends GridPane {
         add(minLon, 3, 0);
     }
 
+    public static boolean checkAndSetCoordinates(Coordinate bottomLeft, Coordinate bottomRight, Coordinate topLeft, Coordinate topRight){
+
+        double maxLat = MapUtil.maxLat(bottomLeft, bottomRight, topLeft, topRight);
+        double maxLon = MapUtil.maxLon(bottomLeft, bottomRight, topLeft, topRight);
+        double minLat = MapUtil.minLat(bottomLeft, bottomRight, topLeft, topRight);
+        double minLon = MapUtil.minLon(bottomLeft, bottomRight, topLeft, topRight);
+
+        if(maxLat>Display.maxLatDatabase || maxLon>Display.maxLonDatabase || minLat<Display.minLatDatabase || minLon<Display.minLonDatabase){
+            notWithinBoundsError();
+            return false;
+        }
+        _maxLatText.setText(Double.toString(round(maxLat,7)));
+        _maxLonText.setText(Double.toString(round(maxLon,7)));
+        _minLatText.setText(Double.toString(round(minLat,7)));
+        _minLonText.setText(Double.toString(round(minLon,7)));
+
+        Display.recordBox.setSelected(false);
+        return true;
+    }
+
+
+    public static void notWithinBoundsError(){
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("One or more ponts outside of simulation area");
+            alert.setContentText("Draw box within yellow markers");
+            alert.showAndWait();
+        });
+    }
+
+    /**
+     * Author: http://stackoverflow.com/questions/2808535/round-a-double-to-2-decimal-places
+     * @param value
+     * @param places
+     * @return
+     */
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
 }

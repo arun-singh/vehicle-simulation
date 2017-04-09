@@ -5,9 +5,14 @@ import Simulation.Simulate;
 import Statistics.Statistics;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.concurrent.ScheduledService;
+import javafx.concurrent.Task;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
@@ -25,11 +30,19 @@ public class Display extends Application{
 
     static final int WIDTH = 1000;
     static final int HEIGHT = 1000;
+    static final double maxLatDatabase = 52.6299987;
+    static final double minLatDatabase = 52.3800027;
+    static final double maxLonDatabase = -1.7000001;
+    static final double minLonDatabase = -2.1999973;
+
     static Stage primaryStage;
+    static public ScheduledService<Boolean> service;
 
     double maxLat, minLat, maxLon, minLon;
-    boolean statsMode = false;
-    static CheckBox recordBox;
+    public static CheckBox recordBox;
+    public static CheckBox stats;
+    private Button control;
+
     CoordPane coordPane = new CoordPane();
     Map map = Map.getInstance();
 
@@ -39,20 +52,42 @@ public class Display extends Application{
         Display.primaryStage.setWidth(WIDTH);
         Display.primaryStage.setHeight(HEIGHT);
 
-        Display.recordBox = new CheckBox();
-        GridPane gp = new GridPane();
+        recordBox = new CheckBox();
+        stats = new CheckBox();
 
-        Button control = new Button("Start");
+        GridPane gp = new GridPane();
+        gp.setVgap(10);
+
+        Label drawBox = new Label("Draw bounding box");
+        Label statsOption = new Label("Enable statistics mode");
+
+        control = new Button("Start");
         control.setOnAction(this::execute);
         VBox m = new VBox(map);
-        map.getMap().setDisplayPosition(new Coordinate((52.3800027+52.6299987)/2, (-2.1999973 + -1.7000001)/2), 10);
-        map.getMap().addMapMarker(new MapMarkerDot(new Coordinate(52.6299987, -2.1999973)));
-        map.getMap().addMapMarker(new MapMarkerDot(new Coordinate(52.3800027, -1.7000001)));
+        setPosition();
+        map.getMap().addMapMarker(new MapMarkerDot(new Coordinate(maxLatDatabase, minLonDatabase)));
+        map.getMap().addMapMarker(new MapMarkerDot(new Coordinate(minLatDatabase, maxLonDatabase)));
 
+
+        GridPane user = new GridPane();
+        user.getColumnConstraints().add(new ColumnConstraints(70));
+        user.getColumnConstraints().add(new ColumnConstraints(130));
+        user.getColumnConstraints().add(new ColumnConstraints(50));
+        user.getColumnConstraints().add(new ColumnConstraints(145));
+        user.getColumnConstraints().add(new ColumnConstraints(50));
+        //user.getColumnConstraints().add(new ColumnConstraints(650));
+//        grid.getRowConstraints().add(new RowConstraints(getHeight() * 0.65));
+//        grid.getRowConstraints().add(new RowConstraints(getHeight() * 0.35));
+
+        user.add(control, 0, 0);
+        user.add(drawBox, 1, 0);
+        user.add(recordBox, 2, 0);
+        user.add(statsOption, 3, 0);
+        user.add(stats, 4, 0);
 
         gp.add(m, 0, 0);
-        gp.add(control, 0, 1);
-        gp.add(recordBox, 1, 1);
+        gp.add(user, 0, 1);
+//        gp.add(recordBox, 1, 1);
         gp.add(coordPane, 0, 2);
 
         Scene scene = new Scene(gp);
@@ -72,32 +107,67 @@ public class Display extends Application{
 
         map.getMap().setDisplayPosition(new Coordinate(midLat, midLon), 14);
 
-        TimerTask task = new TimerTask() {
+//        TimerTask task = new TimerTask() {
+//            @Override
+//            public void run() {
+//                Map.getInstance().update();
+//            }
+//        };
+
+//        Timer timer = new Timer();
+//        long delay = 0;
+//        long intevalPeriod = 100;
+//
+//        timer.scheduleAtFixedRate(task, delay,
+//                intevalPeriod);
+
+            service = new ScheduledService<Boolean>() {
             @Override
-            public void run() {
-                Map.getInstance().update();
+            protected Task<Boolean> createTask() {
+                return new Task<Boolean>() {
+                    @Override
+                    protected Boolean call() throws Exception {
+                        Map.getInstance().update();
+                        return true;
+                    }
+                };
             }
         };
+        service.setPeriod(javafx.util.Duration.millis(100));
+        service.start();
 
-        Timer timer = new Timer();
-        long delay = 0;
-        long intevalPeriod = 100;
 
-        timer.scheduleAtFixedRate(task, delay,
-                intevalPeriod);
-
+        userInputLock(true);
         Thread thread = new Thread(){
             public void run(){
-                if(!statsMode) {
+                if(!stats.isSelected()) {
                     Grid grid = new Grid(maxLat, minLat, maxLon, minLon);
                     Simulate simulate = new Simulate(grid);
                     simulate.run();
-                }else {
-                    List<List<Statistics>> stats = Statistics.increaseCars(100, 1600, 100, 5,
+
+                    Platform.runLater(() -> {
+                        userInputLock(false);
+                        clearMap();
+                    });
+                    Platform.runLater(() -> {
+                        clearRectangles();
+                    });
+                    Platform.runLater(() -> {
+                        clearMarkers();
+                    });
+                    Platform.runLater(() -> {
+                        setPosition();
+                    });
+
+                    }else {
+                    List<List<Statistics>> stats = Statistics.increaseCars(100, 1000, 100, 5,
                             new double[]{maxLat, minLat, maxLon, minLon});
 
                     Platform.runLater(() -> {
                         drawGraphs(stats);
+                        userInputLock(false);
+                        clearMap();
+                        clearRectangles();
                     });
                 }
             }
@@ -124,6 +194,31 @@ public class Display extends Application{
         Scene scene = new Scene(gridPane);
         graphs.setScene(scene);
         graphs.show();
+    }
+
+    public void userInputLock(boolean lock){
+        stats.setDisable(lock);
+        recordBox.setDisable(lock);
+        control.setDisable(lock);
+    }
+
+    public synchronized void clearMap(){
+        map.getMap().removeAllMapPolygons();
+    }
+
+    public synchronized void clearRectangles(){
+        map.getMap().removeAllMapRectangles();
+    }
+
+    public synchronized void clearMarkers(){
+        map.getMap().removeAllMapMarkers();
+
+        map.getMap().addMapMarker(new MapMarkerDot(new Coordinate(maxLatDatabase, minLonDatabase)));
+        map.getMap().addMapMarker(new MapMarkerDot(new Coordinate(minLatDatabase, maxLonDatabase)));
+    }
+
+    public synchronized void setPosition(){
+        map.getMap().setDisplayPosition(new Coordinate((minLatDatabase+maxLatDatabase)/2, (minLonDatabase+maxLonDatabase)/2), 10);
     }
 
     public static void main(String[] args){
