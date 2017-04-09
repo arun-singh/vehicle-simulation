@@ -54,7 +54,7 @@ public class Simulate {
         int step = 0;
         int vehiclesLeft = -1;
         while (vehiclesLeft != 0) {
-            //// For all links process turns
+            /// For all links process turns
             for (Map.Entry<Integer, Link> entry : grid.getLinkMap().entrySet()) {
                 handleIntersections(entry.getValue(), step);
             }
