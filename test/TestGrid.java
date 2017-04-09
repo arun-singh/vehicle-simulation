@@ -133,7 +133,7 @@ public class TestGrid {
         System.out.println("Step is: " + step + " Estimated average is: " + Statistics.estimatedAverageJourneyTime(vehicles) + " Actual average is: " + Statistics.actualAverageJourneyTime(vehicles));
         System.out.println(Statistics.totalVehiclesInput(linkMap));
         System.out.println("Waiting pushed: " + waitingPushed);
-        System.out.println("ShockWaves: " + sim.shockwavesGenerated);
+       // System.out.println("ShockWaves: " + sim.shockwavesGenerated);
        // assertThat(vehicle.getRoute().get(2).getOutputQueue().getReceived().size(), is(1));
     }
 }

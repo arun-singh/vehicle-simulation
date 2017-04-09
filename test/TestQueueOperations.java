@@ -361,7 +361,7 @@ public class TestQueueOperations {
         double inFrontOfLast = QUtil.distanceInFront(queue, v3);
         assertThat(inFrontOfLast, is(v4.getLength() + v2.getLength() + v1.getLength()));
 
-        //Sam _eet
+        //Same _eet
         v2.setEarliestExitTime(1);
         double same = QUtil.distanceInFront(queue, v2);
         assertThat(same, is(v4.getLength()));

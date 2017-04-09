@@ -19,7 +19,7 @@ public class TestStatistics {
         LinkedHashMap<Integer, Link> linkMap = new LinkedHashMap<>();
         for(int i = 0; i<10000;i++){
             Link link = new Link(i);
-            link.getOutputQueue().received(new Vehicle(i), i);
+            link.getExitPoint().received(new Vehicle(i), i);
             linkMap.put(i,link);
         }
 

@@ -21,11 +21,6 @@ public class TestShockwaves {
     final int maxCarLength = 6;
 
     @Test
-    public void randomShockwaveTest(){
-        System.out.println(Simulate.shockwaveSpeed(20, 10, 5, 10));
-    }
-
-    @Test
     public void testProcessShockwave(){
         int QUEUE_SIZE = 10;
         Random ran = new Random();
@@ -33,8 +28,8 @@ public class TestShockwaves {
         Link linkOne = new Link(1);
         Link linkTwo = new Link(2);
 
-        Queue queueOne = new Queue(QUEUE_SIZE, linkOne, null);
-        Queue queueTwo = new Queue(QUEUE_SIZE, linkTwo, null);
+        Queue queueOne = new Queue(QUEUE_SIZE, linkOne);
+        Queue queueTwo = new Queue(QUEUE_SIZE, linkTwo);
         linkOne.setQueue(queueOne);
         linkTwo.setQueue(queueTwo);
 
@@ -70,8 +65,8 @@ public class TestShockwaves {
         Link linkOne = new Link(1);
         Link linkTwo = new Link(2);
 
-        Queue queueOne = new Queue(QUEUE_SIZE, linkOne, null);
-        Queue queueTwo = new Queue(QUEUE_SIZE, linkTwo, null);
+        Queue queueOne = new Queue(QUEUE_SIZE, linkOne);
+        Queue queueTwo = new Queue(QUEUE_SIZE, linkTwo);
         linkOne.setQueue(queueOne);
         linkTwo.setQueue(queueTwo);
         linkOne.getServers().add(new Server(linkOne, linkTwo, Server.Type.NORMAL));
@@ -101,8 +96,8 @@ public class TestShockwaves {
         Simulate sim = new Simulate();
         Link linkOne = new Link(1);
         Link linkTwo = new Link(2);
-        Queue queueOne = new Queue(QUEUE_SIZE, linkOne, null);
-        Queue queueTwo = new Queue(QUEUE_SIZE, linkTwo, null);
+        Queue queueOne = new Queue(QUEUE_SIZE, linkOne);
+        Queue queueTwo = new Queue(QUEUE_SIZE, linkTwo);
         linkOne.setQueue(queueOne);
         linkTwo.setQueue(queueTwo);
         Server server = new Server(linkOne, linkTwo, Server.Type.NORMAL);
