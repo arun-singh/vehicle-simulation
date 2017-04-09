@@ -94,7 +94,7 @@ public class MapUtil {
                 .collect(Collectors.toList());
     }
 
-    public static String maxLat(Coordinate one, Coordinate two, Coordinate three, Coordinate four){
+    public static double maxLat(Coordinate one, Coordinate two, Coordinate three, Coordinate four){
         double largest = one.getLat();
         if(two.getLat()>largest)
             largest = two.getLat();
@@ -102,10 +102,10 @@ public class MapUtil {
             largest = three.getLat();
         if(four.getLat()>largest)
             largest = four.getLat();
-        return Double.toString(round(largest,7));
+        return largest;
     }
 
-    public static String minLat(Coordinate one, Coordinate two, Coordinate three, Coordinate four){
+    public static double minLat(Coordinate one, Coordinate two, Coordinate three, Coordinate four){
         double smallest = one.getLat();
         if(two.getLat()<smallest)
             smallest = two.getLat();
@@ -113,10 +113,10 @@ public class MapUtil {
             smallest = three.getLat();
         if(four.getLat()<smallest)
             smallest = four.getLat();
-        return Double.toString(round(smallest, 7));
+        return smallest;
     }
 
-    public static String minLon(Coordinate one, Coordinate two, Coordinate three, Coordinate four){
+    public static double minLon(Coordinate one, Coordinate two, Coordinate three, Coordinate four){
         double smallest = one.getLon();
         if(two.getLon()<smallest)
             smallest = two.getLon();
@@ -124,10 +124,10 @@ public class MapUtil {
             smallest = three.getLon();
         if(four.getLon()<smallest)
             smallest = four.getLon();
-        return Double.toString(round(smallest, 7));
+        return smallest;
     }
 
-    public static String maxLon(Coordinate one, Coordinate two, Coordinate three, Coordinate four){
+    public static double maxLon(Coordinate one, Coordinate two, Coordinate three, Coordinate four){
         double largest = one.getLon();
         if(two.getLon()>largest)
             largest = two.getLon();
@@ -135,7 +135,7 @@ public class MapUtil {
             largest = three.getLon();
         if(four.getLon()>largest)
             largest = four.getLon();
-        return Double.toString(round(largest, 7));
+        return largest;
     }
 
     public static double getNodesDistance(Coordinate startCoord, Coordinate endCoord) {
@@ -165,11 +165,5 @@ public class MapUtil {
     }
 
 
-    public static double round(double value, int places) {
-        if (places < 0) throw new IllegalArgumentException();
 
-        BigDecimal bd = new BigDecimal(value);
-        bd = bd.setScale(places, RoundingMode.HALF_UP);
-        return bd.doubleValue();
-    }
 }
