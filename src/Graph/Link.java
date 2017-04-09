@@ -20,7 +20,10 @@ public class Link{
     private int lanes;
     private double runningLength;
     private double runningDensity = 0.0;
-    private double vMin, vFree, kMin, kMax;
+    private double vMin;
+    private double vFree;
+    private double kMin;
+    private double kMax;
     private LinkPolyline polyline;
     private int lookBackLimit;
     private List<Server> servers = new ArrayList<>();
@@ -32,13 +35,6 @@ public class Link{
     private boolean accessable;
     private int connectivity;
     private List<Coordinate> coords = new ArrayList<>();
-
-    public Link(int id, Node source, Node target){
-        this.id = id;
-        this.source = source;
-        this.target = target;
-        polyline = new LinkPolyline(this, generateInitialPath());
-    }
 
     public Link(int id){this.id = id;}
     public Link(int id, int queueCapacity){
@@ -60,8 +56,8 @@ public class Link{
         if(k > kMax)
             return vMin;
 
-        double u = 1 - Math.pow(((k - kMin)/(kMax-kMin)), 2);
-        double v = Math.pow(u, 2);
+        double u = 1 - Math.pow(((k - kMin)/(kMax-kMin)), 1);
+        double v = Math.pow(u, 1);
         double x = vFree - vMin;
         double y = x * v;
         double z = vMin + y;
@@ -69,31 +65,59 @@ public class Link{
         return z;
     }
 
+    public double speedDensity2(double k){
+        if(k <= kMin)
+            return vFree;
+        if(k > kMax)
+            return vMin;
+
+        double u = 1 - Math.pow(((k - kMin)/(kMax-kMin)), 1);
+        double v = Math.pow(u, 1);
+        double x = vFree - vMin;
+        double y = x * v;
+        double z = vMin + y;
+
+        return z;
+    }
+
+    public double speedDensity3(double time){
+        int qSize = queue.size();
+        double prop = -1;
+        if(qSize==0){
+            return 11;
+        }else{
+            prop = (((double)qSize)/queue.getCapacity()) * 100;
+        }
+
+        if(prop>0 && prop<=10){
+            return 10;
+        }else if(prop>10 && prop<=20){
+            return 9;
+        }else if(prop>20 && prop<=30){
+            return 8;
+        }else if(prop>30 && prop<=40){
+            return 7;
+        }else if(prop>40 && prop<=50){
+            return 6;
+        }else if(prop>50 && prop<=60){
+            return 5;
+        }else if(prop>60 && prop<=70){
+            return 4;
+        }else if(prop>70 && prop<=80){
+            return 3;
+        }else if(prop>80 && prop<=90){
+            return 2;
+        }else if(prop>90 && prop<=100){
+            return 1;
+        }
+        return 1;
+    }
+
     public double runningDensity(double time){
         int carCount = queue.runningSectionCars(time);
         double runningLength = queue.size() != 0 ? getLength() - (queue.queueLength(time)/getLanes()) : 0;
         double density = runningLength != 0.0 ? ((double)(carCount)) / (runningLength * getLanes()) : 0;
-        return density;
-    }
-
-    public List<Coordinate> generateInitialPath(){
-        List<Double[]> requested = RequestMapData.getCoordinates(getSource(), getTarget());
-        List<Point> points = new ArrayList<>();
-        List<Coordinate> coordinates = new ArrayList<>();
-        JMapViewer map = Map.getInstance().getMap();
-
-        for(int i = 0; i < requested.size(); i++) {
-            coordinates.add(new Coordinate(requested.get(i)[0], requested.get(i)[1]));
-            points.add(map.getMapPosition(requested.get(i)[0], requested.get(i)[1], false));
-        }
-
-        Path2D path = new Path2D.Double();
-        Point first = points.get(0);
-        path.moveTo(first.getX(),first.getY());
-        for(Point p : points){
-            path.lineTo(p.getX(), p.getY());
-        }
-        return coordinates;
+        return density * 100;
     }
 
     public boolean isFree(){
@@ -117,8 +141,6 @@ public class Link{
                     new Server(entry.getValue(), l, Server.Type.NORMAL)));
         }
     }
-
-
 
     public Queue getQueue() {return queue;}
     public int getLanes() {
@@ -223,5 +245,17 @@ public class Link{
 
     public void setCoords(List<Coordinate> coords) {
         this.coords = coords;
+    }
+
+    public double getvMin() {
+        return vMin;
+    }
+
+    public double getkMin() {
+        return kMin;
+    }
+
+    public double getkMax() {
+        return kMax;
     }
 }
