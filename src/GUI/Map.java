@@ -51,7 +51,6 @@ public class Map extends GridPane {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-
                 swingNode.setContent(map);
             }
         });
@@ -99,25 +98,6 @@ public class Map extends GridPane {
         }
     }
 
-    public void drawEdges(List<Node[]> coords){
-        List<MapPolygon> lines = new ArrayList<>();
-        for(int i = 0; i < coords.size(); i++){
-            Coordinate upstream = new Coordinate(coords.get(i)[0].getLatitude(), coords.get(i)[0].getLongitude());
-            Coordinate downstream = new Coordinate(coords.get(i)[1].getLatitude(), coords.get(i)[1].getLongitude());
-            MapPolyLine poly = new MapPolyLine(new ArrayList<Coordinate>(){{
-                add(upstream);
-                add(downstream);
-            }});
-            poly.setColor(Color.red);
-            poly.setStroke(new BasicStroke(4));
-            poly.setVisible(true);
-            lines.add(poly);
-        }
-        map.setMapPolygonList(lines);
-        map.setMapPolygonsVisible(true);
-        //map.repaint();
-    }
-
     public void drawQueueServers(HashMap<Integer, Link> linkMap){
         System.out.println("Total nodes is " + (linkMap.entrySet().size() * 2));
         HashSet<Node> serverNodes = new HashSet<>();
@@ -159,36 +139,25 @@ public class Map extends GridPane {
     }
 
 
-    public void drawRoutes(Vehicle[] vehicles){
-        List<MapPolygon> polylines = new ArrayList<>();
-        for (Vehicle veh :
-                vehicles) {
-            List<Coordinate> coords = new ArrayList<>();
-            List<Link> route = veh.getRoute();
-            for (int i = 0; i < route.size(); i++) {
-//                List<Coordinate> line = route.get(i).getPolyline().getCoordinates();
-//                for(Coordinate c : line){
-//                    coords.add(c);
-//                }
-                Coordinate s = new Coordinate(route.get(i).getSource().getLatitude(), route.get(i).getSource().getLongitude());
-                Coordinate t = new Coordinate(route.get(i).getTarget().getLatitude(), route.get(i).getTarget().getLongitude());
-                coords.add(s); coords.add(t);
-            }
-            polylines.add(new MapPolyLine(coords));
-        }
-        map.setMapPolygonList(polylines);
-    }
-
-    public void drawGrid(HashMap<Integer, Link> linkMap){
-        List<MapPolygon> poly = new ArrayList<>();
-        List<Link> links = linkMap.entrySet().stream().map(l->l.getValue()).collect(Collectors.toList());
-        for(java.util.Map.Entry<Integer, Link> entry : linkMap.entrySet()){
-            List<Coordinate> coords = entry.getValue().getPolyline().getCoordinates();
-            poly.add(new MapPolyLine(coords));
-        }
-        map.setMapPolygonList(poly);
-    }
-
+//    public void drawRoutes(Vehicle[] vehicles){
+//        List<MapPolygon> polylines = new ArrayList<>();
+//        for (Vehicle veh :
+//                vehicles) {
+//            List<Coordinate> coords = new ArrayList<>();
+//            List<Link> route = veh.getRoute();
+//            for (int i = 0; i < route.size(); i++) {
+////                List<Coordinate> line = route.get(i).getPolyline().getCoordinates();
+////                for(Coordinate c : line){
+////                    coords.add(c);
+////                }
+//                Coordinate s = new Coordinate(route.get(i).getSource().getLatitude(), route.get(i).getSource().getLongitude());
+//                Coordinate t = new Coordinate(route.get(i).getTarget().getLatitude(), route.get(i).getTarget().getLongitude());
+//                coords.add(s); coords.add(t);
+//            }
+//            polylines.add(new MapPolyLine(coords));
+//        }
+//        map.setMapPolygonList(polylines);
+//    }
 
     public void drawBounds(){
         java.util.List<double[]> latlon = new ArrayList<>();
