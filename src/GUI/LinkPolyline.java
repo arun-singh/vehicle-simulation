@@ -16,6 +16,8 @@ import java.util.List;
 
 /**
  * Created by Arun on 29/01/2017.
+ *
+ * Author for polyline (Constructor and buildPath()): http://stackoverflow.com/questions/20252592/draw-polyline-in-jmapviewer
  */
 public class LinkPolyline extends MapPolygonImpl{
 
@@ -45,7 +47,6 @@ public class LinkPolyline extends MapPolygonImpl{
         Path2D path = buildPath(wayPoints);
         g2d.draw(path);
         g2d.dispose();
-
     }
 
     private Path2D buildPath(List<Point> wayPoints) {
