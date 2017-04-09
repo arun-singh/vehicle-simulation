@@ -61,8 +61,7 @@ public class Queue extends PriorityQueue<Vehicle> implements QueueTemplate {
     public void runningProportion(double time, int runningCars){
         double size = size();
         double newProportion = ((double)runningCars)/size;
-        if(newProportion != runningProportion)
-            setRunningProportion(newProportion);
+        if(newProportion != runningProportion) setRunningProportion(newProportion);
     }
 
     public int getCapacity() {
