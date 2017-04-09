@@ -130,8 +130,8 @@ public class Grid {
                 polys.add(link.getPolyline());
                 //Map.getInstance().getMap().addMapPolygon(link.getPolyline());
 
-                link.setkMin(0);
-                link.setkMax(((double)capacity)/length);
+                link.setkMin(0.5);
+                link.setkMax((((double)capacity)/length) * 100);
                 link.setvMin(1);
                 link.setvFree(12);
                 linkMap.put(id, link);
