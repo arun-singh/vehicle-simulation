@@ -7,12 +7,13 @@ import Statistics.Statistics;
 
 import java.util.*;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 /**
  * Created by Arun on 27/01/2017.
  */
-public class Simulate {
+public class Simulate implements Callable<Statistics>{
 
     private final int ONE_STEP = 1;
     public static boolean running = false;
@@ -261,5 +262,10 @@ public class Simulate {
 
     public Statistics getStats() {
         return stats;
+    }
+
+    @Override
+    public Statistics call() throws Exception {
+        return run();
     }
 }

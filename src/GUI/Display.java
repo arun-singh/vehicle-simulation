@@ -160,7 +160,7 @@ public class Display extends Application{
                     });
 
                     }else {
-                    List<List<Statistics>> stats = Statistics.increaseCars(100, 1600, 100, 10,
+                    List<List<Statistics>> stats = Statistics.increaseCars2(100, 1500, 100, 20,
                             new double[]{maxLat, minLat, maxLon, minLon});
 
                     Platform.runLater(() -> {

@@ -10,6 +10,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.layout.VBox;
 
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -33,7 +34,7 @@ public class Statistics {
         this.linkMap = linkMap;
         this.cars = cars;
         this.shockMap = shockMap;
-       // report(finishStep, shockwavesGenerated,  vehicles, linkMap);
+        // report(finishStep, shockwavesGenerated,  vehicles, linkMap);
     }
 
     public Statistics(){}
@@ -57,6 +58,36 @@ public class Statistics {
                 Simulate simulate = new Simulate(cars, coords);
                 perCar.add(simulate.run());
             }
+            stats.add(perCar);
+            cars+=increment;
+        }
+        return stats;
+    }
+
+    public static List<List<Statistics>> increaseCars2(int carsBegin, int carsEnd, int increment, int runs, double[] coords){
+        List<List<Statistics>> stats = new ArrayList<>();
+        ExecutorService pool = Executors.newFixedThreadPool(runs);
+        int cars = carsBegin;
+        while(cars <= carsEnd){
+            // System.out.println((cars/((double)carsEnd))+"%");
+            List<Statistics> perCar = new ArrayList<>();
+            Set<Future<Statistics>> set = new HashSet<Future<Statistics>>();
+            for (int i = 0; i < runs; i++) {
+                Callable<Statistics> simulate = new Simulate(cars, coords);
+                Future<Statistics> future = pool.submit(simulate);
+                set.add(future);
+            }
+
+            for (Future<Statistics> future : set) {
+                try {
+                    perCar.add(future.get());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+
             stats.add(perCar);
             cars+=increment;
         }
@@ -155,10 +186,7 @@ public class Statistics {
             Integer step2 = keyList.get(i-1);
             int shock2 = swm.get(step2);
 
-            if(i==1){
-                series.getData().add(new XYChart.Data<>(step1, shock1));
-            }
-            series.getData().add(new XYChart.Data<>(step2, shock2-shock1));
+            series.getData().add(new XYChart.Data<>(step2, (shock1-shock2)/2));
         }
         return box;
     }
@@ -239,9 +267,9 @@ public class Statistics {
 
     public static void diagnostics(HashMap<Integer, Link> linkMap){
         List<Link> occupied = linkMap.entrySet().stream()
-                                                .filter(l->l.getValue().getQueue().size()>0)
-                                                .map(Map.Entry::getValue)
-                                                .collect(Collectors.toList());
+                .filter(l->l.getValue().getQueue().size()>0)
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
 
         occupied.sort(new Comparator<Link>() {
             @Override

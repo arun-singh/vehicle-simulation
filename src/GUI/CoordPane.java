@@ -34,19 +34,19 @@ public class CoordPane extends GridPane {
         HBox maxLat = new HBox(1);
         maxLat.getChildren().add(0, _maxLatLabel);
         maxLat.getChildren().add(1, _maxLatText);
-        _maxLatText.setText("52.422039");
+        _maxLatText.setText("52.4470647");
         HBox minLat = new HBox(1);
         minLat.getChildren().add(0, _minLatLabel);
         minLat.getChildren().add(1, _minLatText);
-        _minLatText.setText("52.404448");
+        _minLatText.setText("52.429955");
         HBox maxLon = new HBox(1);
         maxLon.getChildren().add(0, _maxLonLabel);
         maxLon.getChildren().add(1, _maxLonText);
-        _maxLonText.setText("-1.774139");
+        _maxLonText.setText("-1.9105911");
         HBox minLon = new HBox(1);
         minLon.getChildren().add(0, _minLonLabel);
         minLon.getChildren().add(1, _minLonText);
-        _minLonText.setText("-1.813321");
+        _minLonText.setText("-1.941576");
 
         add(maxLat, 0, 0);
         add(minLat, 1, 0);
