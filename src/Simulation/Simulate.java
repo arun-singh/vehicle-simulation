@@ -90,7 +90,9 @@ public class Simulate {
             Vehicle vehicle = new Vehicle(i);
             vehicle.setLength(length);
 
-            List<Link> route = Grid.generateRoute(inputLinks); //grid.oneRouteDemo(grid.getLinkMap());
+            //int routeNumber = grid.getRoutes().size();
+            //int randomRoute = ran.nextInt((routeNumber-1) + 1);
+            List<Link> route = Grid.generateRoute(inputLinks);;
             vehicle.setRoute(route);
 
             List<Link> list = vehicle.getRoute();

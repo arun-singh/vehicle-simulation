@@ -30,20 +30,25 @@ public class MapUtil {
                 .collect(Collectors.toList());
     }
 
-    public static List<Link> getTargetLinks(HashMap<Integer, Link> map, Node source, List<Link> route){
+    public static List<Link> getTargetLinks(HashMap<Integer, Link> map, Link source, List<Link> route){
         List<Node> sources;
         Predicate<Link> pred;
-        if(route.size()>1){
-            sources = route.stream().map(l->l.getSource()).collect(Collectors.toList());
-            pred = l -> l.getSource().equals(source) && !sources.contains(l.getTarget());
-        }else{
-            pred = l -> l.getSource().equals(source);
-        }
+//        if(route.size()>1){
+//            sources = route.stream().map(l->l.getSource()).collect(Collectors.toList());
+//            pred = l -> l.getSource().equals(source) && !sources.contains(l.getTarget());
+//        }else{
+//            pred = l -> l.getSource().equals(source);
+//        }
 
-        return map.entrySet().stream()
-                .filter(l->pred.test(l.getValue()))
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
+//        if(route.size()>1){
+//            sources = route.stream().map(l->l.getSource()).collect(Collectors.toList());
+//            pred = l -> l.getSource().equals(source.getTarget()) && !l.getTarget().equals(source.getSource()) && !sources.contains(l.getTarget());
+//        }else{
+//            pred = l -> l.getSource().equals(source.getTarget()) && !l.getTarget().equals(source.getSource());
+//
+//        }
+
+        return source.getServers().stream().map(s->s.getOutgoing()).collect(Collectors.toList());
     }
 
     public static boolean isUnconnected(List<Node[]> pairs, Node[] pair){

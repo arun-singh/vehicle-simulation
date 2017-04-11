@@ -20,13 +20,13 @@ public class Statistics {
 
     private int shockwavesGenerated;
     private Vehicle[] vehicles;
-    private HashMap<Integer, Link> linkMap;
+    private LinkedHashMap<Integer, Link> linkMap;
     private int cars;
-    HashMap<Integer, Integer> vehiclesMap;
-    HashMap<Integer, Integer> shockMap;
+    LinkedHashMap<Integer, Integer> vehiclesMap;
+    LinkedHashMap <Integer, Integer> shockMap;
 
-    public Statistics(HashMap<Integer, Integer> vehiclesMap, int shockwavesGenerated,  Vehicle[] vehicles, HashMap<Integer, Link> linkMap, int cars,
-                      HashMap<Integer, Integer> shockMap){
+    public Statistics(LinkedHashMap<Integer, Integer> vehiclesMap, int shockwavesGenerated,  Vehicle[] vehicles, LinkedHashMap<Integer, Link> linkMap, int cars,
+                      LinkedHashMap<Integer, Integer> shockMap){
         this.vehiclesMap = vehiclesMap;
         this.shockwavesGenerated = shockwavesGenerated;
         this.vehicles = vehicles;
@@ -78,6 +78,7 @@ public class Statistics {
 
             int cars = stat.get(0).getCars();
             double averageFinish = stat.stream().mapToDouble(s->s.getFinishStep()).sum() / stat.size();
+            double n = stat.size();
 
             double temp = 0;
             for(Statistics s : stat){
@@ -85,10 +86,11 @@ public class Statistics {
             }
             double var = temp/stat.size();
             double stdv = Math.sqrt(var);
+            double stde = stdv/(Math.sqrt(n));
 
             series.getData().add(new XYChart.Data<>(cars, averageFinish));
-            error.getData().add(new XYChart.Data<>(cars, averageFinish+stdv));
-            error.getData().add(new XYChart.Data<>(cars, averageFinish-stdv));
+            error.getData().add(new XYChart.Data<>(cars, averageFinish+stde));
+            error.getData().add(new XYChart.Data<>(cars, averageFinish-stde));
 
             Node line = series.getNode().lookup(".chart-series-line");
             line.setStyle("-fx-stroke: " + "blue");
@@ -112,6 +114,7 @@ public class Statistics {
             chart.getData().add(error);
             int cars = stat.get(0).getCars();
             double averageFinish = stat.stream().mapToDouble(s->s.getShockwavesGenerated()).sum() / stat.size();
+            double n = stat.size();
 
             double temp = 0;
             for(Statistics s : stat){
@@ -119,10 +122,11 @@ public class Statistics {
             }
             double var = temp/stat.size();
             double stdv = Math.sqrt(var);
+            double stde = stdv/(Math.sqrt(n));
 
             series.getData().add(new XYChart.Data<>(cars, averageFinish));
-            error.getData().add(new XYChart.Data<>(cars, averageFinish+stdv));
-            error.getData().add(new XYChart.Data<>(cars, averageFinish-stdv));
+            error.getData().add(new XYChart.Data<>(cars, averageFinish+stde));
+            error.getData().add(new XYChart.Data<>(cars, averageFinish-stde));
 
             Node line = series.getNode().lookup(".chart-series-line");
             line.setStyle("-fx-stroke: " + "blue");
@@ -143,9 +147,18 @@ public class Statistics {
         List<Statistics> ls = results.get(results.size()-1);
         Statistics s = ls.get(0);
         HashMap<Integer, Integer> swm = s.shockMap;
+        List<Integer> keyList = new ArrayList<>(swm.keySet());
+        for(int i = 1; i < keyList.size(); i++) {
+            Integer step1 = keyList.get(i);
+            int shock1 = swm.get(step1);
 
-        for(Map.Entry<Integer, Integer> entry : swm.entrySet()){
-            series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
+            Integer step2 = keyList.get(i-1);
+            int shock2 = swm.get(step2);
+
+            if(i==1){
+                series.getData().add(new XYChart.Data<>(step1, shock1));
+            }
+            series.getData().add(new XYChart.Data<>(step2, shock2-shock1));
         }
         return box;
     }
@@ -275,22 +288,6 @@ public class Statistics {
 
     public void setShockwavesGenerated(int shockwavesGenerated) {
         this.shockwavesGenerated = shockwavesGenerated;
-    }
-
-    public Vehicle[] getVehicles() {
-        return vehicles;
-    }
-
-    public void setVehicles(Vehicle[] vehicles) {
-        this.vehicles = vehicles;
-    }
-
-    public HashMap<Integer, Link> getLinkMap() {
-        return linkMap;
-    }
-
-    public void setLinkMap(HashMap<Integer, Link> linkMap) {
-        this.linkMap = linkMap;
     }
 
     public int getCars() {

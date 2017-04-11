@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 public class Grid {
 
     private LinkedHashMap<Integer, Link> linkMap;
+    private List<List<Link>> routes = new ArrayList<>();
     private static Random ran = new Random();
     private int averageConnectivity;
     private int maxCarLength = 6;
@@ -30,7 +31,10 @@ public class Grid {
         System.out.println(" Creating servers");
         Link.createServers(linkMap);
         System.out.println("Finished server creation");
-       // Map.getInstance().drawMapMarkers(carsFilter);
+        //List<List<Link>> ghroutes = GH.generateRoutes(linkMap, 1);
+        //routes = generateRoutes(MapUtil.getInputLinks(linkMap, 0), 100);
+        //GH.drawRoute(routes.get(0));
+        // Map.getInstance().drawMapMarkers(carsFilter);
 
         /*
 
@@ -141,56 +145,7 @@ public class Grid {
         //Map.getInstance().getMap().paintImmediately(0, 0, Map.getInstance().getMap().getWidth(), Map.getInstance().getMap().getHeight());
     }
 
-    public void generateOneWayLinks(List<Node[]> nodePairs, List<Double> lengths, List<Boolean> oneway, List<List<Coordinate>> linestring) {
-        int seen = 0;
-        List<MapPolygon> polys = new ArrayList<>();
-        for(int i = 0; i<nodePairs.size(); i++) {
-            boolean ow = oneway.get(i);
-            int rev = 1;
-            for(int j = 0 ; j < rev ; j++){
-                int id = seen;
-                seen++;
 
-                double length = lengths.get(i);
-                int capacity = (int)(Math.ceil(length/maxCarLength));
-                if(capacity==0) capacity=1;
-
-                Node[] pair = nodePairs.get(i);
-                Node start = pair[j==0?0:1];
-                Node end = pair[j==0?1:0];
-
-                Link link = new Link(id, capacity, start, end);
-                link.setLength(length);
-                double lookBack = capacity==1 ? 1 : Math.ceil(((double)capacity)/4);
-                link.setLookBackLimit(lookBack == 0 ? 1 : (int)lookBack);
-
-                //b
-                int lanes = 1;//ran.nextInt(maxLane - minLanes + 1) + minLanes;
-                link.setLanes(lanes);
-
-                List<Coordinate> coords = linestring.get(i);
-                if(j==1){
-                    List<Coordinate> reversed = new ArrayList<>();
-                    for(int k = coords.size()-1; k>=0; k--){
-                        reversed.add(new Coordinate(coords.get(k).getLat(), coords.get(k).getLon()));
-                    }
-                    link.setPolyline(reversed);
-                }else{
-                    link.setPolyline(coords);
-                }
-
-                polys.add(link.getPolyline());
-                //Map.getInstance().getMap().addMapPolygon(link.getPolyline());
-
-                link.setkMin(0);
-                link.setkMax(((double)capacity)/length);
-                link.setvMin(1);
-                link.setvFree(12);
-                linkMap.put(id, link);
-            }
-        }
-        Map.getInstance().getMap().setMapPolygonList(polys);
-    }
 
     private void generateArtificalLinks(Node[] nodes, List<Integer[]> nodePairs, HashMap<Integer, Link> linkMap) {
         int roadLengthMax = 1000;
@@ -236,6 +191,40 @@ public class Grid {
     }
 
 
+    public List<List<Link>> generateRoutes(List<Link> inputLinks, int totalRoutes){
+        List<List<Link>> routes = new ArrayList<>();
+        for(int i = 0; i < totalRoutes; i++){
+            List<Link> route = new ArrayList<>();
+            int randomStartingLink = ran.nextInt((inputLinks.size()-1) + 1);
+            Link next = inputLinks.get(randomStartingLink);
+            route.add(next);
+            int serverSize = next.getServers().size();
+            while(serverSize!=0) {
+                if(serverSize>1){
+                    // Get outgoing with largest number of servers
+                    int largest = Integer.MIN_VALUE;
+                    Link ll = null;
+                    for(Server s : next.getServers()){
+                        int ss = s.getOutgoing().getServers().size();
+                        if(ss>largest) {
+                            largest = ss;
+                            ll = s.getOutgoing();
+                        }
+                    }
+                    next = ll;
+                }else{
+                    next = next.getServers().get(0).getOutgoing();
+                }
+                if(route.contains(next))
+                    break;
+                route.add(next);
+                serverSize = next.getServers().size();
+            }
+            routes.add(route);
+        }
+        return routes;
+    }
+
     public static List<Link> generateRoute(List<Link> inputLinks){
         List<Link> route = new ArrayList<>();
         int randomStartingLink = ran.nextInt((inputLinks.size()-1) + 1);
@@ -268,33 +257,6 @@ public class Grid {
         return route;
     }
 
-    public static double maxLat(List<double[]> latLon){
-        return latLon.stream()
-                .mapToDouble(d->d[0])
-                .reduce(0,(l1, l2)->l2>l1?l2:l1);
-    }
-
-    public static double minLat(List<double[]> latLon){
-        return latLon.stream()
-                .mapToDouble(d->d[0])
-                .reduce(Double.MAX_VALUE, (l1, l2)->l2<l1?l2:l1);
-    }
-
-
-    public static double maxLon(List<double[]> latLon){
-        return latLon.stream()
-                .mapToDouble(d->d[1])
-                .reduce((l1, l2)->Double.min(l1, l2))
-                .getAsDouble();
-    }
-
-    public static double minLon(List<double[]> latLon){
-        return latLon.stream()
-                .mapToDouble(d->d[1])
-                .reduce((l1, l2)->Double.max(l1, l2))
-                .getAsDouble();
-    }
-
     private void generateArtificialNodes(Node[] nodes, int totalNodes){
         nodes = new Node[totalNodes];
         for(int i = 0; i<totalNodes;i++){
@@ -323,5 +285,9 @@ public class Grid {
 
     public void setAverageConnectivity(int averageConnectivity) {
         this.averageConnectivity = averageConnectivity;
+    }
+
+    public List<List<Link>> getRoutes() {
+        return routes;
     }
 }
