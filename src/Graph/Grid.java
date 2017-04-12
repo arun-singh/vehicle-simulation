@@ -5,6 +5,7 @@ import GUI.Map;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapPolygon;
 
+import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -30,9 +31,11 @@ public class Grid {
         generateNodePairs(rs);
         System.out.println(" Creating servers");
         Link.createServers(linkMap);
+        //System.out.println("Serializing");
+        //serializeLinkMap(linkMap);
         System.out.println("Finished server creation");
         //List<List<Link>> ghroutes = GH.generateRoutes(linkMap, 1);
-        //routes = generateRoutes(MapUtil.getInputLinks(linkMap, 0), 100);
+       // routes = generateRoutes(MapUtil.getInputLinks(linkMap, 0), 10000);
         //GH.drawRoute(routes.get(0));
         // Map.getInstance().drawMapMarkers(carsFilter);
 
@@ -275,6 +278,19 @@ public class Grid {
         nodePairs.add(new Integer[]{6, 8});
 
         return nodePairs;
+    }
+
+    public void serializeLinkMap(LinkedHashMap<Integer, Link> linkMap){
+        try {
+            FileOutputStream fileOut = new FileOutputStream("/Users/Arun/Documents/MOJO-Simulation/Resources/Birmingham.ser");
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(linkMap);
+            out.close();
+            fileOut.close();
+            System.out.printf("Data saved in ../../Resources/Birmingham.ser");
+        }catch(IOException i) {
+            i.printStackTrace();
+        }
     }
 
     public LinkedHashMap<Integer, Link> getLinkMap(){ return linkMap; }
