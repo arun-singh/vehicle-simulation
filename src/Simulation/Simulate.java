@@ -54,6 +54,7 @@ public class Simulate implements Callable<Statistics>{
 
         int step = 0;
         int vehiclesLeft = -1;
+        long start = System.currentTimeMillis();
         while (vehiclesLeft != 0) {
             /// For all links process turns
             for (Map.Entry<Integer, Link> entry : grid.getLinkMap().entrySet()) {
@@ -79,6 +80,9 @@ public class Simulate implements Callable<Statistics>{
            // Statistics.diagnostics(grid.getLinkMap());
             step++;
         }
+        long end = System.currentTimeMillis();
+        long duration = (end - start);
+        System.out.println("Duration: " + duration);
         stats = new Statistics(vehiclesMap, shockwavesGenerated, vehicles, grid.getLinkMap(), totalVehicles, shockMap);
         System.out.println(shockwavesGenerated);
         running = false;
@@ -93,7 +97,7 @@ public class Simulate implements Callable<Statistics>{
 
             //int routeNumber = grid.getRoutes().size();
             //int randomRoute = ran.nextInt((routeNumber-1) + 1);
-            List<Link> route = Grid.generateRoute(inputLinks);;
+            List<Link> route = Grid.generateRoute(inputLinks);
             vehicle.setRoute(route);
 
             List<Link> list = vehicle.getRoute();
@@ -104,9 +108,17 @@ public class Simulate implements Callable<Statistics>{
             vehicles[i] = vehicle;
         }
 
-        for (int i = 0; i < totalVehicles; i++) {
+        int initialPush = totalVehicles; //>= 1000 ? 1000 : totalVehicles;
+        //int waiting = initialPush == 1000 ? totalVehicles - 1000 : 0;
+
+        for (int i = 0; i < initialPush; i++) {
             vehicles[i].getRoute().get(0).getEntryPoint().push(vehicles[i], 0.0);
         }
+//        if(waiting>0){
+//            for(int j = 1000; j < totalVehicles; j++){
+//                vehicles[j].getRoute().get(0).getEntryPoint().getWaiting().add(vehicles[j]);
+//            }
+//        }
         return vehicles;
     }
 
