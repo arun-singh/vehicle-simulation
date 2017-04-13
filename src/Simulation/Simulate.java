@@ -7,12 +7,13 @@ import Statistics.Statistics;
 
 import java.util.*;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 /**
  * Created by Arun on 27/01/2017.
  */
-public class Simulate {
+public class Simulate implements Callable<Statistics>{
 
     private final int ONE_STEP = 1;
     public static boolean running = false;
@@ -21,6 +22,7 @@ public class Simulate {
     private Random ran = new Random();
     boolean randomise = false;
     private Statistics stats;
+    public static final int INCREMENTAL_PUSH_SIZE = 1000;
 
     private int totalVehicles = 1000;
 
@@ -53,6 +55,7 @@ public class Simulate {
 
         int step = 0;
         int vehiclesLeft = -1;
+        long start = System.currentTimeMillis();
         while (vehiclesLeft != 0) {
             /// For all links process turns
             for (Map.Entry<Integer, Link> entry : grid.getLinkMap().entrySet()) {
@@ -64,7 +67,7 @@ public class Simulate {
             for (EntryPoint queue : waiting)
                 queue.pushWaiting(step);
 
-            vehiclesLeft = totalVehicles - Statistics.totalVehiclesOutput(grid.getLinkMap());
+            vehiclesLeft = totalVehicles - GridUtil.totalVehiclesOutput(grid.getLinkMap());
 
             System.out.println(vehiclesLeft);
             vehiclesMap.put(step, vehiclesLeft);
@@ -78,6 +81,9 @@ public class Simulate {
            // Statistics.diagnostics(grid.getLinkMap());
             step++;
         }
+        long end = System.currentTimeMillis();
+        long duration = (end - start);
+        System.out.println("Duration: " + duration);
         stats = new Statistics(vehiclesMap, shockwavesGenerated, vehicles, grid.getLinkMap(), totalVehicles, shockMap);
         System.out.println(shockwavesGenerated);
         running = false;
@@ -90,7 +96,9 @@ public class Simulate {
             Vehicle vehicle = new Vehicle(i);
             vehicle.setLength(length);
 
-            List<Link> route = Grid.generateRoute(inputLinks); //grid.oneRouteDemo(grid.getLinkMap());
+            //int routeNumber = grid.getRoutes().size();
+            //int randomRoute = ran.nextInt((routeNumber-1) + 1);
+            List<Link> route = Grid.generateRoute(inputLinks);
             vehicle.setRoute(route);
 
             List<Link> list = vehicle.getRoute();
@@ -101,8 +109,16 @@ public class Simulate {
             vehicles[i] = vehicle;
         }
 
-        for (int i = 0; i < totalVehicles; i++) {
+        int initialPush = totalVehicles >= INCREMENTAL_PUSH_SIZE ? INCREMENTAL_PUSH_SIZE : totalVehicles;
+        int waiting = initialPush == INCREMENTAL_PUSH_SIZE ? totalVehicles - INCREMENTAL_PUSH_SIZE : 0;
+
+        for (int i = 0; i < initialPush; i++) {
             vehicles[i].getRoute().get(0).getEntryPoint().push(vehicles[i], 0.0);
+        }
+        if(waiting>0){
+            for(int j = initialPush; j < totalVehicles; j++){
+                vehicles[j].getRoute().get(0).getEntryPoint().getWaiting().add(vehicles[j]);
+            }
         }
         return vehicles;
     }
@@ -163,14 +179,14 @@ public class Simulate {
                 if(relevantLinks.size()!=0) {
                     // Sum all shock speeds
                     double shockSpeedSum = relevantLinks.stream()
-                            .mapToDouble(l -> shockwaveSpeed(server.getOutgoing(), l, time))
+                            .mapToDouble(l -> Link.shockwaveSpeed(server.getOutgoing(), l, time))
                             .sum();
                     shockSpeed = shockSpeedSum / relevantLinks.size(); //average
                 }
             }else{
                 // Only one link to compare
                 if(outgoingServers.size() > 0 && outgoingServers.get(0).getOutgoing().getQueue().size()>0)
-                    shockSpeed = shockwaveSpeed(server.getOutgoing(), outgoingServers.get(0).getOutgoing(), time);
+                    shockSpeed = Link.shockwaveSpeed(server.getOutgoing(), outgoingServers.get(0).getOutgoing(), time);
             }
             //System.out.println(shockSpeed);
             double delayedUntil = server.getOutgoing().getLength() / shockSpeed;
@@ -208,7 +224,7 @@ public class Simulate {
     public void processShockwave(List<Vehicle> vehicles, Link current, double time, Link outgoing) {
         if (current.getQueue().size() == 0)
             return;
-        double shockSpeed = shockwaveSpeed(current, outgoing, time);
+        double shockSpeed = Link.shockwaveSpeed(current, outgoing, time);
         double speedAtCap = current.speedDensity2(current.getkMax());
 
         double latestExitTime = Integer.MAX_VALUE;
@@ -223,14 +239,7 @@ public class Simulate {
         }
     }
 
-    public double shockwaveSpeed(Link upstream, Link downstream, double time){
-        double uK = upstream.getkMax();
-        double dK = ( ((double)downstream.getQueue().size()) /( downstream.getLanes()*downstream.getLength()));
-        double dV = downstream.speedDensity(time);
-        double dQ = dK * dV;
-        double ss =  dQ / uK - dK;
-        return ss;
-    }
+
 
     public void isGridLocked(){
         List<Link> remaining = grid.getLinkMap().entrySet().stream()
@@ -259,5 +268,10 @@ public class Simulate {
 
     public Statistics getStats() {
         return stats;
+    }
+
+    @Override
+    public Statistics call() throws Exception {
+        return run();
     }
 }

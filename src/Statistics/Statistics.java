@@ -1,5 +1,6 @@
 package Statistics;
 
+import Graph.GridUtil;
 import Graph.Link;
 import Graph.Vehicle;
 import Simulation.Simulate;
@@ -10,6 +11,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.layout.VBox;
 
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -20,20 +22,20 @@ public class Statistics {
 
     private int shockwavesGenerated;
     private Vehicle[] vehicles;
-    private HashMap<Integer, Link> linkMap;
+    private LinkedHashMap<Integer, Link> linkMap;
     private int cars;
-    HashMap<Integer, Integer> vehiclesMap;
-    HashMap<Integer, Integer> shockMap;
+    LinkedHashMap<Integer, Integer> vehiclesMap;
+    LinkedHashMap <Integer, Integer> shockMap;
 
-    public Statistics(HashMap<Integer, Integer> vehiclesMap, int shockwavesGenerated,  Vehicle[] vehicles, HashMap<Integer, Link> linkMap, int cars,
-                      HashMap<Integer, Integer> shockMap){
+    public Statistics(LinkedHashMap<Integer, Integer> vehiclesMap, int shockwavesGenerated,  Vehicle[] vehicles, LinkedHashMap<Integer, Link> linkMap, int cars,
+                      LinkedHashMap<Integer, Integer> shockMap){
         this.vehiclesMap = vehiclesMap;
         this.shockwavesGenerated = shockwavesGenerated;
         this.vehicles = vehicles;
         this.linkMap = linkMap;
         this.cars = cars;
         this.shockMap = shockMap;
-       // report(finishStep, shockwavesGenerated,  vehicles, linkMap);
+        // report(finishStep, shockwavesGenerated,  vehicles, linkMap);
     }
 
     public Statistics(){}
@@ -41,22 +43,36 @@ public class Statistics {
     public static void report(int finishStep, int shockwavesGenerated, Vehicle[] vehicles, HashMap<Integer, Link> linkMap){
         System.out.print("Finish time: " + finishStep + " ---- ");
         System.out.print("Shockwaves generated: " + shockwavesGenerated + " ---- ");
-        System.out.print("Grid length: " + totalGridLength(linkMap) + " ---- ");
+        System.out.print("Grid length: " + GridUtil.totalGridLength(linkMap) + " ---- ");
 
-        boolean longer = actualAverageJourneyTime(vehicles) - estimatedAverageJourneyTime(vehicles)  > 0 ? true : false;
+        boolean longer = GridUtil.actualAverageJourneyTime(vehicles) - GridUtil.estimatedAverageJourneyTime(vehicles)  > 0 ? true : false;
         System.out.println("Actual greater than estimate average journey: " +  longer);
     }
 
     public static List<List<Statistics>> increaseCars(int carsBegin, int carsEnd, int increment, int runs, double[] coords){
         List<List<Statistics>> stats = new ArrayList<>();
+        ExecutorService pool = Executors.newFixedThreadPool(runs);
         int cars = carsBegin;
         while(cars <= carsEnd){
-            System.out.println((cars/((double)carsEnd))+"%");
+            // System.out.println((cars/((double)carsEnd))+"%");
             List<Statistics> perCar = new ArrayList<>();
-            for(int i = 0; i < runs; i++){
-                Simulate simulate = new Simulate(cars, coords);
-                perCar.add(simulate.run());
+            Set<Future<Statistics>> set = new HashSet<Future<Statistics>>();
+            for (int i = 0; i < runs; i++) {
+                Callable<Statistics> simulate = new Simulate(cars, coords);
+                Future<Statistics> future = pool.submit(simulate);
+                set.add(future);
             }
+
+            for (Future<Statistics> future : set) {
+                try {
+                    perCar.add(future.get());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+
             stats.add(perCar);
             cars+=increment;
         }
@@ -78,6 +94,7 @@ public class Statistics {
 
             int cars = stat.get(0).getCars();
             double averageFinish = stat.stream().mapToDouble(s->s.getFinishStep()).sum() / stat.size();
+            double n = stat.size();
 
             double temp = 0;
             for(Statistics s : stat){
@@ -85,10 +102,11 @@ public class Statistics {
             }
             double var = temp/stat.size();
             double stdv = Math.sqrt(var);
+            double stde = stdv/(Math.sqrt(n));
 
             series.getData().add(new XYChart.Data<>(cars, averageFinish));
-            error.getData().add(new XYChart.Data<>(cars, averageFinish+stdv));
-            error.getData().add(new XYChart.Data<>(cars, averageFinish-stdv));
+            error.getData().add(new XYChart.Data<>(cars, averageFinish+stde));
+            error.getData().add(new XYChart.Data<>(cars, averageFinish-stde));
 
             Node line = series.getNode().lookup(".chart-series-line");
             line.setStyle("-fx-stroke: " + "blue");
@@ -112,6 +130,7 @@ public class Statistics {
             chart.getData().add(error);
             int cars = stat.get(0).getCars();
             double averageFinish = stat.stream().mapToDouble(s->s.getShockwavesGenerated()).sum() / stat.size();
+            double n = stat.size();
 
             double temp = 0;
             for(Statistics s : stat){
@@ -119,10 +138,11 @@ public class Statistics {
             }
             double var = temp/stat.size();
             double stdv = Math.sqrt(var);
+            double stde = stdv/(Math.sqrt(n));
 
             series.getData().add(new XYChart.Data<>(cars, averageFinish));
-            error.getData().add(new XYChart.Data<>(cars, averageFinish+stdv));
-            error.getData().add(new XYChart.Data<>(cars, averageFinish-stdv));
+            error.getData().add(new XYChart.Data<>(cars, averageFinish+stde));
+            error.getData().add(new XYChart.Data<>(cars, averageFinish-stde));
 
             Node line = series.getNode().lookup(".chart-series-line");
             line.setStyle("-fx-stroke: " + "blue");
@@ -143,9 +163,15 @@ public class Statistics {
         List<Statistics> ls = results.get(results.size()-1);
         Statistics s = ls.get(0);
         HashMap<Integer, Integer> swm = s.shockMap;
+        List<Integer> keyList = new ArrayList<>(swm.keySet());
+        for(int i = 1; i < keyList.size(); i++) {
+            Integer step1 = keyList.get(i);
+            int shock1 = swm.get(step1);
 
-        for(Map.Entry<Integer, Integer> entry : swm.entrySet()){
-            series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
+            Integer step2 = keyList.get(i-1);
+            int shock2 = swm.get(step2);
+
+            series.getData().add(new XYChart.Data<>(step2, (shock1-shock2)/2));
         }
         return box;
     }
@@ -183,52 +209,12 @@ public class Statistics {
     }
 
 
-    public static int totalVehiclesInput(HashMap<Integer, Link> linkMap){
-        return linkMap.entrySet().stream()
-                .mapToInt(l->l.getValue().getEntryPoint().getVehiclesPushed())
-                .sum();
-    }
-
-    public static int totalVehiclesOutput(HashMap<Integer, Link> linkMap){
-        return linkMap.entrySet().stream()
-                .mapToInt(l->l.getValue().getExitPoint().getReceived().size())
-                .sum();
-    }
-
-    public static List<Link> getInputLinks(HashMap<Integer, Link> linkMap){
-        return linkMap.entrySet().stream()
-                .filter(l->l.getValue().getServers().size()>1 && l.getValue().getConnectivity()>250)
-                .map(java.util.Map.Entry::getValue)
-                .collect(Collectors.toList());
-    }
-
-    public static double totalGridLength(HashMap<Integer, Link> linkMap){
-        return linkMap.entrySet().stream()
-                .mapToDouble(l->l.getValue().getLength())
-                .sum();
-    }
-
-    public static double estimatedAverageJourneyTime(Vehicle[] vehicles){
-        double sum = 0;
-        for(Vehicle veh : vehicles){
-            sum += veh.estimatedJourneyTime();
-        }
-        return sum/vehicles.length;
-    }
-
-    public static double actualAverageJourneyTime(Vehicle[] vehicles){
-        double sum = 0;
-        for(Vehicle veh : vehicles){
-            sum += veh.getJourneyTime();
-        }
-        return sum/vehicles.length;
-    }
 
     public static void diagnostics(HashMap<Integer, Link> linkMap){
         List<Link> occupied = linkMap.entrySet().stream()
-                                                .filter(l->l.getValue().getQueue().size()>0)
-                                                .map(Map.Entry::getValue)
-                                                .collect(Collectors.toList());
+                .filter(l->l.getValue().getQueue().size()>0)
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
 
         occupied.sort(new Comparator<Link>() {
             @Override
@@ -275,22 +261,6 @@ public class Statistics {
 
     public void setShockwavesGenerated(int shockwavesGenerated) {
         this.shockwavesGenerated = shockwavesGenerated;
-    }
-
-    public Vehicle[] getVehicles() {
-        return vehicles;
-    }
-
-    public void setVehicles(Vehicle[] vehicles) {
-        this.vehicles = vehicles;
-    }
-
-    public HashMap<Integer, Link> getLinkMap() {
-        return linkMap;
-    }
-
-    public void setLinkMap(HashMap<Integer, Link> linkMap) {
-        this.linkMap = linkMap;
     }
 
     public int getCars() {

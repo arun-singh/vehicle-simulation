@@ -75,9 +75,6 @@ public class Display extends Application{
         user.getColumnConstraints().add(new ColumnConstraints(50));
         user.getColumnConstraints().add(new ColumnConstraints(145));
         user.getColumnConstraints().add(new ColumnConstraints(50));
-        //user.getColumnConstraints().add(new ColumnConstraints(650));
-//        grid.getRowConstraints().add(new RowConstraints(getHeight() * 0.65));
-//        grid.getRowConstraints().add(new RowConstraints(getHeight() * 0.35));
 
         user.add(control, 0, 0);
         user.add(drawBox, 1, 0);
@@ -160,7 +157,7 @@ public class Display extends Application{
                     });
 
                     }else {
-                    List<List<Statistics>> stats = Statistics.increaseCars(100, 1000, 100, 5,
+                    List<List<Statistics>> stats = Statistics.increaseCars(1500, 1500, 100, 20,
                             new double[]{maxLat, minLat, maxLon, minLon});
 
                     Platform.runLater(() -> {

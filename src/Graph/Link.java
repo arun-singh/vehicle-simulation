@@ -142,6 +142,15 @@ public class Link{
         }
     }
 
+    public static double shockwaveSpeed(Link upstream, Link downstream, double time){
+        double uK = upstream.getkMax();
+        double dK = ( ((double)downstream.getQueue().size()) /( downstream.getLanes()*downstream.getLength()));
+        double dV = downstream.speedDensity(time);
+        double dQ = dK * dV;
+        double ss =  dQ / uK - dK;
+        return ss;
+    }
+
     public Queue getQueue() {return queue;}
     public int getLanes() {
         return lanes;

@@ -10,8 +10,11 @@ import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.util.Instruction;
 import com.graphhopper.util.InstructionList;
 import com.graphhopper.util.PointList;
+import com.graphhopper.util.shapes.GHPoint3D;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
+import org.openstreetmap.gui.jmapviewer.MapMarkerCircle;
 import org.openstreetmap.gui.jmapviewer.MapMarkerDot;
+import org.openstreetmap.gui.jmapviewer.Style;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
 
 import java.awt.*;
@@ -88,9 +91,10 @@ public class GH {
             Node startingNode = startingLink.getTarget();
             Node endingNode = pickEndLocation(inputLinks, startingLink);
             InstructionList iList = getGHRoute(hopper, startingNode, endingNode);
-            drawInstructions(iList);
-
-            routes.add(ghToLink(startingLink, endingNode, iList));
+            List<Link> route = ghToLink(startingLink, endingNode, iList);
+            //drawInstructions(iList);
+            drawRoute(route);
+            routes.add(route);
         }
         return routes;
     }
@@ -133,6 +137,92 @@ public class GH {
                 sum += MapUtil.getNodesDistance(new Coordinate(points.getLat(i), points.getLon(i)), new Coordinate(c.getLat(), c.getLon()));
             }
         }
+        return sum/coords.size();
+    }
+
+    private static double distanceFromTarget2(Instruction instruction, Link target){
+        double sum = 0;
+        GUI.Map m = GUI.Map.getInstance();
+        PointList points = instruction.getPoints();
+        List<Coordinate> coords = target.getPolyline().getCoordinates();
+
+        List<Point> targetPoints = new ArrayList<>();
+        List<Point> instructionPoints = new ArrayList<>();
+        for(Coordinate c : coords){
+            targetPoints.add(m.getMap().getMapPosition(c));
+        }
+        for(int i = 0; i < points.size(); i++){
+            Coordinate c = new Coordinate(points.getLat(i), points.getLon(i));
+            instructionPoints.add(m.getMap().getMapPosition(c));
+        }
+
+        for (Point instr : instructionPoints) {
+            for(Point p : targetPoints){
+                sum += Point.distanceSq(instr.getX(), instr.getY(), p.getX(), p.getY());
+            }
+        }
+        return sum;
+    }
+
+    private static double distanceFromTarget3(InstructionList iList, Link target, int pos){
+        double sum = 0;
+        double minimumTotal = 0;
+        GUI.Map m = GUI.Map.getInstance();
+        List<Coordinate> coords = target.getPolyline().getCoordinates();
+
+        List<Point> targetPoints = new ArrayList<>();
+        List<List<Point>> instructionPoints = new ArrayList<>();
+        for(Coordinate c : coords){
+            targetPoints.add(m.getMap().getMapPosition(c));
+        }
+
+        for(int i = pos; i < iList.size(); i++){
+            List<Point> instrPoints = new ArrayList<>();
+            Instruction currInstruction = iList.get(i);
+            for(GHPoint3D p : currInstruction.getPoints()){
+                Coordinate c = new Coordinate(p.getLat(), p.getLon());
+                instrPoints.add(m.getMap().getMapPosition(c));
+            }
+            instructionPoints.add(instrPoints);
+        }
+
+        for(List<Point> hp : instructionPoints) {
+            double min = Integer.MAX_VALUE;
+            for (Point instr : hp) {
+                for (Point p : targetPoints) {
+                    double dis = Point.distanceSq(instr.getX(), instr.getY(), p.getX(), p.getY());
+                    if(dis<min) min = dis;
+                }
+            }
+            minimumTotal+=min;
+        }
+        return minimumTotal;
+    }
+
+    private static double distanceFromTarget4(Instruction instruction, Link target){
+        double sum = 0;
+        GUI.Map m = GUI.Map.getInstance();
+        PointList points = instruction.getPoints();
+        List<Coordinate> coords = target.getPolyline().getCoordinates();
+
+        List<Point> targetPoints = new ArrayList<>();
+        List<Point> instructionPoints = new ArrayList<>();
+        for(Coordinate c : coords){
+            targetPoints.add(m.getMap().getMapPosition(c));
+        }
+        for(int i = 0; i < points.size(); i++){
+            Coordinate c = new Coordinate(points.getLat(i), points.getLon(i));
+            instructionPoints.add(m.getMap().getMapPosition(c));
+        }
+
+        for (Point instr : instructionPoints) {
+            double dis = Integer.MAX_VALUE;
+            for(Point p : targetPoints){
+                double dc = Point.distanceSq(instr.getX(), instr.getY(), p.getX(), p.getY());
+                if(dc<dis) dis=dc;
+            }
+            sum+=dis;
+        }
         return sum;
     }
 
@@ -141,39 +231,87 @@ public class GH {
         List<Coordinate> coords = new ArrayList<>();
 
         HashMap<Integer, Link> linkMap = GUI.Map.getInstance().getGrid().getLinkMap();
-        Node chosen = start.getTarget();
-        for(int i = 0; i <iList.size(); i++){
-            Instruction firstInstr = iList.get(i);
-            List<Link> targets = MapUtil.getTargetLinks(linkMap, chosen, route);
-
-            //Optional<Link> newLink = targets.stream().reduce((t1,t2)->distanceFromTarget(firstInstr, t1) < distanceFromTarget(firstInstr, t2) ? t1 : t2);
-            double avgDis = 100000;
-            Link newLink = null;
-            for(Link t : targets){
-                double dis = distanceFromTarget(firstInstr, t);
-                if(dis<avgDis) {
-                    avgDis = dis;
-                    newLink = t;
-                }
-            }
-
-//            if(!newLink.isPresent()){
+        Link chosen = start;
+        for(int i = 1; i <iList.size(); i++){
+            Instruction instr = iList.get(i);
+//            List<Link> targets = MapUtil.getTargetLinks(linkMap, chosen, route);
+//
+//            //Optional<Link> newLink = targets.stream().reduce((t1,t2)->distanceFromTarget(firstInstr, t1) < distanceFromTarget(firstInstr, t2) ? t1 : t2);
+//            double avgDis = Integer.MAX_VALUE;
+//            Link newLink = null;
+//            for(Link t : targets){
+//                double dis = distanceFromTarget4(instr, t);
+//                if(dis<avgDis) {
+//                    avgDis = dis;
+//                    newLink = t;
+//                }
+//            }
+//
+//            if(newLink==null){
 //                continue;
 //            }
-            chosen = newLink.getTarget();
-
-            //draw new link
-//            Coordinate c = new Coordinate(newLink.getSource().getLatitude(), newLink.getSource().getLongitude());
-//            Coordinate c1 = new Coordinate(newLink.getTarget().getLatitude(), newLink.getTarget().getLongitude());
-//            coords.add(c); coords.add(c1);
-            route.add(newLink);
+//            chosen = newLink;
+//            route.add(newLink);
+            List<Link> updatedRoute = recursiveSnap(iList, linkMap, chosen, new ArrayList<>(), i);
+            if(updatedRoute.size()>0) {
+                chosen = updatedRoute.get(updatedRoute.size() - 1);
+                route.addAll(route.size(), updatedRoute);
+            }
         }
-//        MapPolyLine line = new MapPolyLine(coords);
-//        line.setBackColor(Color.BLUE);
-//        line.setColor(Color.BLUE);
-//        GUI.Map.getInstance().getMap().addMapPolygon(line);
         return route;
     }
+
+    public static List<Link> recursiveSnap(InstructionList instr, HashMap<Integer, Link> linkMap, Link chosen, List<Link> route, int pos){
+        List<Server> servers = chosen.getServers();
+        if (servers.size()==0)
+            return route;
+        boolean switchInstr = pos!=instr.size()-1 ? switchInsruction(chosen, instr.get(pos), instr.get(pos+1)) : false;
+        if(switchInstr)
+            return route;
+
+        List<Link> targets = new ArrayList<>();
+        for(Server s: servers){
+            targets.add(s.getOutgoing());
+        }
+
+        double avgDis = Integer.MAX_VALUE;
+        Link newLink = null;
+        for(Link t : targets){
+            double dis = distanceFromTarget4(instr.get(pos), t);
+            if(dis<avgDis) {
+                avgDis = dis;
+                newLink = t;
+            }
+        }
+        chosen = newLink;
+
+        route.add(newLink);
+        return recursiveSnap(instr, linkMap, chosen, route, pos);
+    }
+
+    public static boolean switchInsruction(Link chosen, Instruction current, Instruction next){
+        GUI.Map m = GUI.Map.getInstance();
+
+        PointList currentPoints = current.getPoints();
+        GHPoint3D lastCurrent = currentPoints.toGHPoint(currentPoints.size()-1);
+
+        PointList nextPoints = next.getPoints();
+        GHPoint3D firstNext = nextPoints.toGHPoint(0);
+
+        Point lC = m.getMap().getMapPosition(lastCurrent.getLat(), lastCurrent.getLon());
+        Point fN = m.getMap().getMapPosition(firstNext.getLat(), firstNext.getLon());
+
+        Point tar = m.getMap().getMapPosition(chosen.getTarget().getLatitude(), chosen.getTarget().getLongitude());
+
+        double disCurrent = Point.distanceSq(tar.getX(), tar.getY(), lC.getX(), lC.getY());
+        double disNext = Point.distanceSq(tar.getX(), tar.getY(), fN.getX(), fN.getY());
+
+        if(disNext < disCurrent)
+            return true;
+
+        return false;
+    }
+
 
     public synchronized static void drawInstructions(InstructionList iList){
         List<Coordinate> coords = new ArrayList<>();
@@ -182,9 +320,28 @@ public class GH {
             PointList pl = instr .getPoints();
             for (int i = 0; i < pl.size(); i++) {
                 MapMarkerDot md = new MapMarkerDot(pl.getLat(i), pl.getLon(i));
+                md.setBackColor(Color.cyan);
                 markers.add(md);
             }
         }
+        GUI.Map.getInstance().getMap().setMapMarkerList(markers);
+    }
+
+
+    public synchronized static void drawRoute(List<Link> route){
+        List<MapMarker> markers = new ArrayList<>();
+        for(int i = 0; i < route.size(); i++){
+            if(i==route.size()-1){
+                MapMarkerDot tar = new MapMarkerDot(route.get(i).getTarget().getLatitude(),route.get(i).getTarget().getLongitude());
+                tar.setBackColor(Color.red);
+                markers.add(tar);
+                continue;
+            }
+            MapMarkerDot src = new MapMarkerDot(route.get(i).getSource().getLatitude(), route.get(i).getSource().getLongitude());
+            src.setBackColor(Color.red);
+            markers.add(src);
+        }
+        //markers.addAll(route.size(), GUI.Map.getInstance().getMap().getMapMarkerList());
         GUI.Map.getInstance().getMap().setMapMarkerList(markers);
     }
 

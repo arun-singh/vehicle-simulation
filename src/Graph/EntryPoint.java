@@ -1,5 +1,7 @@
 package Graph;
 
+import Simulation.Simulate;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,16 +33,16 @@ public class EntryPoint {
     }
 
     public boolean pushWaiting(double time){
-        for(Vehicle veh: waiting){
+        for(int i = 0; i < Simulate.INCREMENTAL_PUSH_SIZE ; i++){
             if(link.isFree()) {
                 double speed = link.speedDensity(time);
                 double _eet = time + (link.getLength() / speed);
-                veh.setEarliestExitTime(_eet);
-                veh.setLinkCounter(1);
-                veh.setNextLink(veh.getRoute().get(1));
-                veh.setStartTime(time);
-                link.getQueue().push(veh);
-                waiting.remove(veh);
+                waiting.get(i).setEarliestExitTime(_eet);
+                waiting.get(i).setLinkCounter(1);
+                waiting.get(i).setNextLink(waiting.get(i).getRoute().get(1));
+                waiting.get(i).setStartTime(time);
+                link.getQueue().push(waiting.get(i));
+                waiting.remove(waiting.get(i));
                 ++vehiclesPushed;
                 return true;
             }
