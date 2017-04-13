@@ -79,6 +79,36 @@ public class Statistics {
         return stats;
     }
 
+    public static List<List<Statistics>> increaseCars2(int carsBegin, int carsEnd, int increment, int runs, double[] coords){
+        List<List<Statistics>> stats = new ArrayList<>();
+        ExecutorService pool = Executors.newFixedThreadPool(runs);
+        int cars = carsBegin;
+        while(cars <= carsEnd){
+            // System.out.println((cars/((double)carsEnd))+"%");
+            List<Statistics> perCar = new ArrayList<>();
+            Set<Future<Statistics>> set = new HashSet<Future<Statistics>>();
+            for (int i = 0; i < runs; i++) {
+                Callable<Statistics> simulate = new Simulate(cars, coords);
+                Future<Statistics> future = pool.submit(simulate);
+                set.add(future);
+            }
+
+            for (Future<Statistics> future : set) {
+                try {
+                    perCar.add(future.get());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            stats.add(perCar);
+            cars+=increment;
+        }
+        return stats;
+    }
+
     public static VBox drawCarStats(List<List<Statistics>> results, String xLabel, String yLabel){
 
         LineChart chart = createChart(xLabel, yLabel);

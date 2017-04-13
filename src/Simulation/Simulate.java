@@ -120,6 +120,7 @@ public class Simulate implements Callable<Statistics>{
                 vehicles[j].getRoute().get(0).getEntryPoint().getWaiting().add(vehicles[j]);
             }
         }
+
         return vehicles;
     }
 
