@@ -1,3 +1,4 @@
+import Graph.GridUtil;
 import Graph.Link;
 import Statistics.Statistics;
 import Graph.Vehicle;
@@ -23,7 +24,7 @@ public class TestStatistics {
             linkMap.put(i,link);
         }
 
-        int out = Statistics.totalVehiclesOutput(linkMap);
+        int out = GridUtil.totalVehiclesOutput(linkMap);
         assertThat(out, is(10000));
     }
 
@@ -36,7 +37,7 @@ public class TestStatistics {
             linkMap.put(i,link);
         }
 
-        int out = Statistics.totalVehiclesInput(linkMap);
+        int out = GridUtil.totalVehiclesInput(linkMap);
         assertThat(out, is(10000));
     }
 }
