@@ -71,7 +71,7 @@ public class TestGrid {
         }
 
         Link.createServers(linkMap);
-        List<Link> inputLinks = Statistics.getInputLinks(linkMap);
+        List<Link> inputLinks = GridUtil.getInputLinks(linkMap);
 
         Vehicle[] vehicles = new Vehicle[totalVehicles];
         for(int i =0; i<totalVehicles;i++){
@@ -79,7 +79,7 @@ public class TestGrid {
             Vehicle vehicle = new Vehicle(i);
             vehicle.setLength(length);
 
-            int randomStartingLink = ran.nextInt((inputLinks.size()-1) - 0 + 1);
+            int randomStartingLink = 0;//ran.nextInt((inputLinks.size()-1) + 1);
             Link next = inputLinks.get(randomStartingLink);
             vehicle.getRoute().add(next);
             int serverSize = next.getServers().size();
@@ -125,13 +125,13 @@ public class TestGrid {
                 queue.pushWaiting(step);
             }
 
-            vehiclesLeft = totalVehicles - Statistics.totalVehiclesOutput(linkMap);
+            vehiclesLeft = totalVehicles - GridUtil.totalVehiclesOutput(linkMap);
             System.out.println(vehiclesLeft);
             step++;
         }
 
-        System.out.println("Step is: " + step + " Estimated average is: " + Statistics.estimatedAverageJourneyTime(vehicles) + " Actual average is: " + Statistics.actualAverageJourneyTime(vehicles));
-        System.out.println(Statistics.totalVehiclesInput(linkMap));
+        System.out.println("Step is: " + step + " Estimated average is: " + GridUtil.estimatedAverageJourneyTime(vehicles) + " Actual average is: " + GridUtil.actualAverageJourneyTime(vehicles));
+        System.out.println(GridUtil.totalVehiclesInput(linkMap));
         System.out.println("Waiting pushed: " + waitingPushed);
        // System.out.println("ShockWaves: " + sim.shockwavesGenerated);
        // assertThat(vehicle.getRoute().get(2).getOutputQueue().getReceived().size(), is(1));
