@@ -23,8 +23,8 @@ public class Query {
         }
 
         String url = "jdbc:postgresql://mojo-maps-test.cnci99rpgxpu.eu-west-2.rds.amazonaws.com:5432/maps";
-        String user = "inventivecogs";
-        String pass = "***REMOVED***";
+        String user = "";
+        String pass = "";
         try {
             conn = DriverManager.getConnection(url, user, pass);
         } catch (SQLException e) {
